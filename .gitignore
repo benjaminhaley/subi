@@ -1,4 +1,9 @@
 # Files and folders to keep out of the repo
 #
 # bmh Nov 2011
+
+# We don't want anything build related
 dist/
+build/
+setup.py
+
