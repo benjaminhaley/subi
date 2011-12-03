@@ -11,14 +11,14 @@ class subi_db_class:
         import sqlite3 as lite
         import sys
         self.connection = lite.connect('subi.db')
-        if self.tables_exist() == False:
-            self.create_tables()
+        if self.__tables_exist() == False:
+            self.__create_tables()
 
     def close(self):
         self.connection.close()
 
     #   start-up functions (only run once)
-    def tables_exist(self):
+    def __tables_exist(self):
         connection = self.connection
         cursor = connection.cursor()
         TABLES_EXIST = False
@@ -36,7 +36,7 @@ class subi_db_class:
         return TABLES_EXIST
 
 
-    def create_tables(self):
+    def __create_tables(self):
         connection = self.connection
         cursor = connection.cursor()       
         cursor.execute("""CREATE TABLE animals 
@@ -54,7 +54,7 @@ class subi_db_class:
 
 
     #   column functions
-    def column_names(self):
+    def __column_names(self):
         col_list = list()
         
         connection = self.connection
@@ -66,7 +66,7 @@ class subi_db_class:
         return col_list
 
 
-    def column_types(self):
+    def __column_types(self):
         col_list = list()
         
         connection = self.connection
@@ -196,7 +196,9 @@ class subi_db_unit_test:
         if looked_up_row["turtle"] != 2000:
             raise Exception('Update animal field test failed.')
 
-            
+    def add_columns(self, subi_db_object):
+        #   I need to add column tests here
+        pass
 
 
 subi_db = subi_db_class()
