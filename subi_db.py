@@ -40,17 +40,25 @@ class subi_db_class:
         connection = self.connection
         cursor = connection.cursor()       
         cursor.execute("""CREATE TABLE animals 
-                          (animal_id varchar(12));
+                          (animal_id varchar(12) primary key);
                           """)
         connection.commit()
+        
         cursor.execute("""CREATE TABLE col_definitions 
-                          (col_name varchar(12),
+                          (col_name varchar(12) primary key,
                            col_description varchar(12),
                            col_type varchar(12),
                            col_order integer(3),
                            col_group varchar(12),
                            active bool);
                           """)
+        connection.commit()
+
+        cursor = connection.cursor()
+        cursor.execute("""  INSERT INTO col_definitions
+                            (col_name, col_description, col_type, col_group, active)
+                            VALUES
+                            ('animal_id', 'the primary key', 'DECIMAL(10,10)', '', 1);""")
         connection.commit()
 
 
@@ -64,12 +72,21 @@ class subi_db_class:
         connection.row_factory = lite.Row
         cursor = connection.cursor() 
         cursor.execute("""SELECT col_name
-                          FROM   col_definitions;
+                          FROM   col_definitions
+                          WHERE  active = 1;
                           """)
         rows = cursor.fetchall()
         for row in rows:
             col_names.append(row['col_name'])
         return col_names
+        
+
+    def __validate_col_name(self, col_name):
+        #   only allow letters and underscores
+        col_name = col_name.replace("_","")
+        IS_VALID = col_name.isalpha()
+        if not IS_VALID:
+            raise Exception("Column names can be letters or underscores, %s was passed in." % col_name)
         
 
     def __column_types(self):
@@ -89,22 +106,12 @@ class subi_db_class:
         col_name_as_list = [col_name]
         COL_EXISTS = [i for i in col_list if i in col_name_as_list]
         return COL_EXISTS
-
-    
-    def __generate_new_col_name(self):
-        import string
-        import random
-
-        chars = string.ascii_letters
-        col_name = ''.join(random.choice(chars) for x in range(6))
-        while self.__col_exists(col_name):
-            col_name = self.__generate_new_col_name()
-        return col_name
-        
+      
 
     def __validate_col_type(self, col_type):
         if col_type not in self.acceptable_col_types:
             raise Exception('col_type must fit one of acceptable data types.')      
+
 
     def col_info(self, col_name = None):
         #   Returns a list of dictionary row objects
@@ -130,14 +137,13 @@ class subi_db_class:
         rows = cursor.fetchall()
         return rows
 
-    def create_col(self, col_type, col_desc, col_group = None):
-        #   column names are managed in col_defininitions because sqlite can't rename columns:
-        #   http://stackoverflow.com/questions/805363/how-do-i-rename-a-column-in-a-sqlite-database-table
-
+    def create_col(self, col_name, col_type, col_desc, col_group = None):
+        self.__validate_col_name(col_name)
         self.__validate_col_type(col_type)
+        if self.__col_exists(col_name):
+            raise Exception ('Column already exists')
         connection = self.connection
 
-        col_name = self.__generate_new_col_name()
         sql_args = col_name, col_desc, col_type, col_group
         cursor = connection.cursor()
         cursor.execute("""  INSERT INTO col_definitions
@@ -151,32 +157,106 @@ class subi_db_class:
         cursor = connection.cursor()
         cursor.execute(""" ALTER TABLE animals ADD %s %s;""" % sql_args)
         connection.commit()
-
-        return col_name
     
 
-    def update_col(self, col_name, col_type, col_desc, col_group = None):
+    def update_col(self, old_col_name, new_col_name, col_type, col_desc, col_group = None):
         self.__validate_col_type(col_type)
- 
+        self.__validate_col_name(new_col_name)
         connection = self.connection
 
+        #   this is used for the insert select query during col renaming
+        import string
+        old_col_names = self.__column_names()
+        old_col_sql = string.joinfields(old_col_names,sep=",")
+
         #   update column in column_definitions table
-        sql_args = col_desc, col_type, col_group, col_name
+        sql_args = col_desc, col_type, col_group, new_col_name, old_col_name
         cursor = connection.cursor()
         cursor.execute("""  UPDATE  col_definitions
                             SET     col_description = '%s'
                             ,       col_type = '%s'
                             ,       col_group = '%s'
+                            ,       col_name = '%s'
                             WHERE   col_name = '%s';""" % sql_args)
         connection.commit()
 
+        #   this is used for the insert select query during col renaming
+        new_col_info_rows = self.col_info()
+        new_col_list = []
+        for col_entry in new_col_info_rows:
+            col_entry_name = col_entry['col_name']
+            col_entry_type = col_entry['col_type']
+            col_entry_list = [col_entry_name, col_entry_type]
+            new_col_list.append(string.joinfields(col_entry_list,sep=" "))
+        new_col_creation_sql = string.joinfields(new_col_list,sep=", ")
+
+        new_col_names = self.__column_names()
+        new_col_insertion_sql = string.joinfields(new_col_names,sep=",")
+
+
+        cursor = connection.cursor()
+        cursor.execute("""  ALTER TABLE animals RENAME to temp_animals;""" )
+        
+        cursor = connection.cursor()
+        cursor.execute("""  CREATE TABLE animals
+                            (%s);
+                            """ % new_col_creation_sql )
+
+        sql_args = new_col_insertion_sql, old_col_sql
+        cursor.execute("""  INSERT INTO animals
+                            (%s)
+                            SELECT  %s
+                            FROM    temp_animals;
+                            """ % sql_args )
+
+        cursor.execute("""  DROP TABLE temp_animals;""" )
+        connection.commit()
+        
+
+
     def delete_col(self, col_name):
+        #   update the column defs table
         connection = self.connection
         cursor = connection.cursor()
         cursor.execute("""  UPDATE  col_definitions
                             SET     active = 0
                             WHERE   col_name = '%s';""" % col_name)
         connection.commit()
+
+        #   update the animals table
+        #   this is used for the insert select query
+        import string
+        new_col_info_rows = self.col_info()
+        new_col_list = []
+        for col_entry in new_col_info_rows:
+            col_entry_name = col_entry['col_name']
+            col_entry_type = col_entry['col_type']
+            col_entry_list = [col_entry_name, col_entry_type]
+            new_col_list.append(string.joinfields(col_entry_list,sep=" "))
+        new_col_creation_sql = string.joinfields(new_col_list,sep=", ")
+
+        new_col_names = self.__column_names()
+        new_col_insertion_sql = string.joinfields(new_col_names,sep=",")
+        
+        cursor = connection.cursor()
+        cursor.execute("""  ALTER TABLE animals RENAME to temp_animals;""" )
+        
+        cursor = connection.cursor()
+        cursor.execute("""  CREATE TABLE animals
+                            (%s);
+                            """ % new_col_creation_sql )
+
+        sql_args = new_col_insertion_sql, new_col_insertion_sql
+        cursor.execute("""  INSERT INTO animals
+                            (%s)
+                            SELECT  %s
+                            FROM    temp_animals;
+                            """ % sql_args )
+
+        cursor.execute("""  DROP TABLE temp_animals;""" )
+        connection.commit()
+
+        
 
 
     #   animal functions
@@ -233,7 +313,7 @@ class subi_db_class:
 
     #   return a set of lists with all of the active (non-deleted) animal data
     def all_animals(self):
-        
+        pass
 
     #   functions to be used for testing only
     def drop_tables(self):
@@ -271,10 +351,10 @@ class subi_db_integration_test:
             raise Exception('Insert animal test failed.')
 
         #   create a column, then update the value for the inserted animal
-        turtle_col_name = subi_db_object.create_col('DECIMAL(10,10)','this column is about turtles')
-        subi_db_object.update_animal_field(rand_id,turtle_col_name,2000)
+        subi_db_object.create_col('bee','DECIMAL(10,10)','this column is about turtles')
+        subi_db_object.update_animal_field(rand_id, 'bee',2000)
         looked_up_row = subi_db_object.lookup_animal(rand_id)
-        if looked_up_row[turtle_col_name] != 2000:
+        if looked_up_row['bee'] != 2000:
             raise Exception('Update animal field test failed.')
 
     def delete_animal(self, subi_db_object):
@@ -288,10 +368,11 @@ class subi_db_integration_test:
             raise Exception('Delete animal test failed.')
 
     def add_columns(self, subi_db_object):
+        col_name = 'beaver'
         col_type = 'BOOL'
         col_desc = 'Some boolean column'
         col_group = 'boolean items'
-        col_name = subi_db_object.create_col(col_type, col_desc, col_group)
+        subi_db_object.create_col(col_name, col_type, col_desc, col_group)
         col_info = subi_db_object.col_info(col_name)
         for row in col_info:
             if row['col_type'] != col_type:
@@ -300,16 +381,18 @@ class subi_db_integration_test:
                 raise Exception('col_desc did not match')
 
     def update_column(self, subi_db_object):
+        col_name = 'turtle'
         col_type = 'BOOL'
         col_desc = 'Some boolean column'
         col_group = 'boolean items'
-        col_name = subi_db_object.create_col(col_type, col_desc, col_group)
+        subi_db_object.create_col(col_name, col_type, col_desc, col_group)
 
+        new_col_name = 'hamster'
         col_type = 'BOOL'
         col_desc = 'New column description'
         col_group = 'new group'
-        subi_db_object.update_col(col_name, col_type, col_desc, col_group = None)
-        col_info = subi_db_object.col_info(col_name)
+        subi_db_object.update_col(col_name, new_col_name, col_type, col_desc, col_group = None)
+        col_info = subi_db_object.col_info(new_col_name)
         for row in col_info:
             if row['col_type'] != col_type:
                 raise Exception('col_type did not match')
@@ -317,10 +400,11 @@ class subi_db_integration_test:
                 raise Exception('col_desc did not match')        
 
     def delete_column(self, subi_db_object):
+        col_name = 'some_col'
         col_type = 'BOOL'
         col_desc = 'Some boolean column'
         col_group = 'boolean items'
-        col_name = subi_db_object.create_col(col_type, col_desc, col_group)
+        subi_db_object.create_col(col_name, col_type, col_desc, col_group)
         subi_db_object.delete_col(col_name)
         col_info = subi_db_object.col_info(col_name)
         if len(col_info) != 0:
@@ -334,17 +418,18 @@ class subi_db_integration_test:
         col_info = subi_db_object.col_info()
 
         #   add a column
+        col_name = 'turle'
         col_type = 'BOOL'
         col_desc = 'Some boolean column'
         col_group = 'boolean items'
         #   the column name gets returned
-        col_name = subi_db_object.create_col(col_type, col_desc, col_group)
+        subi_db_object.create_col(col_name, col_type, col_desc, col_group)
 
         #   update the column to be in a different group
         col_type = 'BOOL'
         col_desc = 'Some boolean column'
         col_group = 'new group name'
-        subi_db_object.update_col(col_name, col_type, col_desc, col_group)
+        subi_db_object.update_col(col_name, col_name, col_type, col_desc, col_group)
        
         #   create a new animal
         import random
@@ -368,6 +453,11 @@ class subi_db_integration_test:
         
 
 if __name__ == "__main__":
+    #   this deletes the db!
+    #   it should only be used during development
+    test_subi_object = subi_db_class()
+    test_subi_object.drop_tables()
+    
     #   Run some integration tests
     print "Running integration tests..."
     test_object = subi_db_integration_test()
@@ -382,6 +472,10 @@ if __name__ == "__main__":
     test_object.delete_column(test_subi_object)
 
     test_object.regular_use_pattern(test_subi_object)
+
+    #   this deletes the db!
+    #   it should only be used during development
+    test_subi_object.drop_tables()
 
     print "Tests passed!"
     test_subi_object.close()
