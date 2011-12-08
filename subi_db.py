@@ -242,7 +242,7 @@ class subi_db_class:
         
 
 
-class subi_db_unit_test:
+class subi_db_integration_test:
     def non_unique_insert(self, subi_db_object):
         import random
         rand_id = random.randint(100000000,99999999999)
@@ -323,24 +323,10 @@ class subi_db_unit_test:
 
 
 
-subi_db = subi_db_class()
-subi_db.drop_tables()
-subi_db = subi_db_class()
-
-#   informal tests 
-subi_db.insert_new_animal('24')
-subi_db.insert_new_animal('dog')
-turle_col_name = subi_db.create_col('DECIMAL(10,10)', 'This col is about turtles')
-sexy_col_name = subi_db.create_col('VARCHAR(120)', 'A very sexy string col')
-
-subi_db.update_animal_field('24',turle_col_name,2000)
-subi_db.drop_tables()
-
-
 if __name__ == "__main__":
     #   Run some integration tests
     print "Running integration tests..."
-    test_object = subi_db_unit_test()
+    test_object = subi_db_integration_test()
     test_subi_object = subi_db_class()
 
     test_object.non_unique_insert(test_subi_object)
