@@ -231,6 +231,10 @@ class subi_db_class:
         return animal_dict
 
 
+    #   return a set of lists with all of the active (non-deleted) animal data
+    def all_animals(self):
+        
+
     #   functions to be used for testing only
     def drop_tables(self):
         connection = self.connection
@@ -239,7 +243,8 @@ class subi_db_class:
         connection.commit()
         cursor.execute("""DROP TABLE col_definitions;""")
         connection.commit()
-        
+
+    
 
 
 class subi_db_integration_test:
@@ -321,7 +326,46 @@ class subi_db_integration_test:
         if len(col_info) != 0:
             raise Exception('Column was not deleted!')
 
+    def regular_use_pattern(self, subi_db_object):
+        #   in __main__, you would instantiate subi_db_object
+        #   subi_db_object = subi_db_class()
 
+        #   get a list of the columns
+        col_info = subi_db_object.col_info()
+
+        #   add a column
+        col_type = 'BOOL'
+        col_desc = 'Some boolean column'
+        col_group = 'boolean items'
+        #   the column name gets returned
+        col_name = subi_db_object.create_col(col_type, col_desc, col_group)
+
+        #   update the column to be in a different group
+        col_type = 'BOOL'
+        col_desc = 'Some boolean column'
+        col_group = 'new group name'
+        subi_db_object.update_col(col_name, col_type, col_desc, col_group)
+       
+        #   create a new animal
+        import random
+        rand_id = unicode(random.randint(100000000, 99999999999))
+        subi_db_object.insert_new_animal(rand_id)
+
+        #   update the animals' value for colname
+        subi_db_object.update_animal_field(rand_id, col_name, 2000)
+
+        #   look up the animal
+        looked_up_row = subi_db_object.lookup_animal(rand_id)
+
+        #   delete the animal
+        subi_db_object.delete_animal(rand_id)
+
+        #   delete the column
+        subi_db_object.delete_col(col_name)
+
+        #   here, you would close the connection
+        #   subi_db_object.close()
+        
 
 if __name__ == "__main__":
     #   Run some integration tests
@@ -336,6 +380,8 @@ if __name__ == "__main__":
     test_object.add_columns(test_subi_object)
     test_object.update_column(test_subi_object)
     test_object.delete_column(test_subi_object)
+
+    test_object.regular_use_pattern(test_subi_object)
 
     print "Tests passed!"
     test_subi_object.close()
