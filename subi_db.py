@@ -368,20 +368,34 @@ class subi_db_integration_test:
             raise Exception('Delete animal test failed.')
 
     def add_columns(self, subi_db_object):
-        col_name = 'beaver'
+        col_name = 'add_column_test_col'
         col_type = 'BOOL'
         col_desc = 'Some boolean column'
         col_group = 'boolean items'
         subi_db_object.create_col(col_name, col_type, col_desc, col_group)
-        col_info = subi_db_object.col_info(col_name)
+        col_info =subi_db_object.col_info(col_name)
         for row in col_info:
             if row['col_type'] != col_type:
                 raise Exception('col_type did not match')
             if row['col_description'] != col_desc:
                 raise Exception('col_desc did not match')
 
+    def add_duplicate_column_fails(self, subi_db_object):
+        col_name = 'duplication_test_col'
+        col_type = 'BOOL'
+        col_desc = 'Some boolean column'
+        col_group = 'boolean items'
+        subi_db_object.create_col(col_name, col_type, col_desc, col_group)
+        TEST_FAILED = False
+        try:
+            subi_db_object.create_col(col_name, col_type, col_desc, col_group)
+        except:
+            TEST_PASSED = True
+        if not TEST_PASSED:
+            raise Exception("Adding a duplicate column did not raise an exception")
+
     def update_column(self, subi_db_object):
-        col_name = 'turtle'
+        col_name = 'update_test_col'
         col_type = 'BOOL'
         col_desc = 'Some boolean column'
         col_group = 'boolean items'
@@ -400,7 +414,7 @@ class subi_db_integration_test:
                 raise Exception('col_desc did not match')        
 
     def delete_column(self, subi_db_object):
-        col_name = 'some_col'
+        col_name = 'deletion_test'
         col_type = 'BOOL'
         col_desc = 'Some boolean column'
         col_group = 'boolean items'
@@ -468,6 +482,7 @@ if __name__ == "__main__":
     test_object.delete_animal(test_subi_object)
     
     test_object.add_columns(test_subi_object)
+    test_object.add_duplicate_column_fails(test_subi_object)                                        
     test_object.update_column(test_subi_object)
     test_object.delete_column(test_subi_object)
 
