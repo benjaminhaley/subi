@@ -312,8 +312,16 @@ class subi_db_class:
 
 
     #   return a set of lists with all of the active (non-deleted) animal data
-    def all_animals(self):
-        pass
+    def run_sql_query(self, sql_string):
+        import sqlite3 as lite
+        connection = self.connection
+        #   this will allow the data to get returned as a dictionary
+        connection.row_factory = lite.Row
+        cursor = connection.cursor() 
+        cursor.execute(""" %s; """ % sql_string)
+        rows = cursor.fetchall()
+        return rows
+        
 
     #   functions to be used for testing only
     def drop_tables(self):
@@ -462,6 +470,9 @@ class subi_db_integration_test:
         #   delete the column
         subi_db_object.delete_col(col_name)
 
+        #   return all the rows from animal table
+        all_rows = subi_db_object.run_sql_query("SELECT * FROM animals")
+
         #   here, you would close the connection
         #   subi_db_object.close()
         
@@ -485,7 +496,7 @@ if __name__ == "__main__":
     test_object.add_duplicate_column_fails(test_subi_object)                                        
     test_object.update_column(test_subi_object)
     test_object.delete_column(test_subi_object)
-
+   
     test_object.regular_use_pattern(test_subi_object)
 
     #   this deletes the db!
