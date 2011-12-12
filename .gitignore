@@ -6,4 +6,5 @@
 dist/
 build/
 setup.py
+.DS_store
 
