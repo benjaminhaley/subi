@@ -1,5 +1,73 @@
-Subi data entry and retrival system
+#####################################
+# 
+# Subi data entry and retrival system
+#
+# bmh and dp Dec 2011
+# benjamin.haley@gmail.com
+# daveponet@gmail.com
+# 
 
-bmh and dp Dec 2011
-benjamin.haley@gmail.com
-daveponet@gmail.com
+#####################################
+# 
+# Contents
+#
+
+Contents include
+* () indicate not written
+
+  1. Start the webservices
+     (from windows exe)
+     (from mac app)
+     from source
+     
+  2. Build the application
+     for mac
+     (for windows)
+
+#####################################
+# 
+# Start webserver
+#
+
+To start the webservice from source
+  1. Change into the subi directory 
+     e.g. cd subi
+
+  2. Launch the webserver
+     sudo python subi.py
+  
+  3. Visit localhost
+     http://localhost/index.html
+
+####################################
+# 
+# Build applications
+#
+
+To build a mac or windows application
+
+  1. Start in subi directory
+     e.g. cd subi/
+  
+  2. Remove previous build lines
+     rm -rf build dist/
+  
+  3. Build the app
+     python setup.py py2app     # Add -A option to use source files (for updating)
+  
+  4. Kill any exisiting webservers 
+     ps -a                      (find the process id of the webserver)
+     e.g. sudo kill -9 24234    (if the process id was 24234)
+  
+  5. Launch the app
+     sudo ./dist/subi.app/Contents/MacOS/subi
+
+
+To edit setup.py
+
+  Setup.py code was borrowed from 
+  http://svn.pythonmac.org/py2app/py2app/trunk/doc/index.html#self-bootstrapping
+  It is made to setup both windows and mac.
+  There are many options that can be changed.
+  Just be sure to avoid the option ARGV
+  which kill mac
