@@ -1,4 +1,14 @@
-#Copyright Jon Berg , turtlemeat.com
+# Controller for subi webservice
+#
+# adapted from 
+#   Jon Berg , turtlemeat.com
+#   http://fragments.turtlemeat.com/pythonwebserver.php
+#
+# by 
+#   Ben Haley - Dec 2011
+#   <benjamin.haley@gmail.com> 
+
+webdir = '../../../../web'
 
 import string,cgi,time
 from os import curdir, sep
@@ -10,7 +20,7 @@ class MyHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
             if self.path.endswith(".html"):
-                f = open(curdir + sep + self.path) #self.path has /test.html
+                f = open(webdir + self.path) #self.path has /test.html
 #note that this potentially makes every file on your computer readable by the internet
 
                 self.send_response(200)
