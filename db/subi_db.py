@@ -45,8 +45,7 @@ class subi_db_class:
         connection.commit()
         
         cursor.execute("""CREATE TABLE col_definitions 
-                          (created_time varchar(20) primary key,
-			   col_name varchar(12),
+                          (col_name varchar(12) primary key,
                            col_description varchar(12),
                            col_type varchar(12),
                            col_order integer(3),
@@ -57,9 +56,9 @@ class subi_db_class:
 
         cursor = connection.cursor()
         cursor.execute("""  INSERT INTO col_definitions
-                            (created_time, col_name, col_description, col_type, col_group, active)
+                            (col_name, col_description, col_type, col_group, active)
                             VALUES
-                            (strftime('%Y-%m-%d %H:%M:%S.%f'),'animal_id', 'the primary key', 'DECIMAL(10,10)', '', 1);""")
+                            ('animal_id', 'the primary key', 'DECIMAL(10,10)', '', 1);""")
         connection.commit()
 
 
@@ -155,15 +154,9 @@ class subi_db_class:
         sql_args = [col_name, col_desc, col_type, col_group]
         cursor = connection.cursor()
         cursor.execute("""  INSERT INTO col_definitions
-                            (
-			     created_time, 
-			     col_name, col_description, col_type, col_group, active
-			    )
+                            (col_name, col_description, col_type, col_group, active)
                             VALUES
-                            (
-			     strftime('%Y-%m-%d %H:%M:%S.%f'),
-			     ?, ?, ?, ?, 1
-			    );
+                            (?, ?, ?, ?, 1);
 		       """, sql_args)
         connection.commit()
 
