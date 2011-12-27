@@ -6,6 +6,12 @@
 dist/
 build/
 setup.py
-.DS_store
+*.pyc
+
+# No data in the repo
 subi.db
+
+# Ignore helper files
+.DS_store
+*.swp
 
