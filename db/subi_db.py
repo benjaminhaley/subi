@@ -45,7 +45,8 @@ class subi_db_class:
         connection.commit()
         
         cursor.execute("""CREATE TABLE col_definitions 
-                          (col_name varchar(12) primary key,
+                          (created_time varchar(20) primary key,
+			   col_name varchar(12),
                            col_description varchar(12),
                            col_type varchar(12),
                            col_order integer(3),
@@ -56,9 +57,9 @@ class subi_db_class:
 
         cursor = connection.cursor()
         cursor.execute("""  INSERT INTO col_definitions
-                            (col_name, col_description, col_type, col_group, active)
+                            (created_time, col_name, col_description, col_type, col_group, active)
                             VALUES
-                            ('animal_id', 'the primary key', 'DECIMAL(10,10)', '', 1);""")
+                            (strftime('%Y-%m-%d %H:%M:%S.%f'),'animal_id', 'the primary key', 'DECIMAL(10,10)', '', 1);""")
         connection.commit()
 
 
@@ -86,7 +87,8 @@ class subi_db_class:
         col_name = col_name.replace("_","")
         IS_VALID = col_name.isalpha()
         if not IS_VALID:
-            raise Exception("Column names can be letters or underscores, %s was passed in." % col_name)
+            raise Exception("""Column names can be letters or underscores,
+			       %s was passed in.""" % col_name)
         
 
     def __column_types(self):
@@ -111,6 +113,7 @@ class subi_db_class:
     def __validate_col_type(self, col_type):
         if col_type not in self.acceptable_col_types:
             raise Exception('col_type must fit one of acceptable data types.')      
+	return True
 
 
     def col_info(self, col_name = None):
@@ -119,47 +122,62 @@ class subi_db_class:
         #   otherwise, all are returned
         import sqlite3 as lite
 
-        sql_str = ''
-        if col_name == None:
-            pass
-        else:
-            sql_str_list = "AND col_name ='" , col_name , "'"
-            sql_str = "".join(sql_str_list)
-        
         connection = self.connection
         connection.row_factory = lite.Row
         cursor = connection.cursor() 
-        cursor.execute("""SELECT *
-                          FROM   col_definitions
-                          WHERE  active = 1
-                          %s;
-                          """ %sql_str)
+
+        sql_str = ''
+        if col_name == None:
+	    cursor.execute("""SELECT *
+			      FROM   col_definitions
+			      WHERE  active = 1
+			      """
+			  )
+        else:
+	    cursor.execute("""SELECT *
+			      FROM   col_definitions
+			      WHERE  active = 1
+		              AND col_name =?
+			      """, [col_name]
+			  )
+        
         rows = cursor.fetchall()
         return rows
 
     def create_col(self, col_name, col_type, col_desc, col_group = None):
+	# check for injection
         self.__validate_col_name(col_name)
         self.__validate_col_type(col_type)
         if self.__col_exists(col_name):
             raise Exception ('Column already exists')
         connection = self.connection
 
-        sql_args = col_name, col_desc, col_type, col_group
+        sql_args = [col_name, col_desc, col_type, col_group]
         cursor = connection.cursor()
         cursor.execute("""  INSERT INTO col_definitions
-                            (col_name, col_description, col_type, col_group, active)
+                            (
+			     created_time, 
+			     col_name, col_description, col_type, col_group, active
+			    )
                             VALUES
-                            ('%s', '%s', '%s', '%s', 1);""" % sql_args)
+                            (
+			     strftime('%Y-%m-%d %H:%M:%S.%f'),
+			     ?, ?, ?, ?, 1
+			    );
+		       """, sql_args)
         connection.commit()
 
-        #   add columnn to animals table
+	#  add columnn to animals table
         sql_args = col_name, col_type
         cursor = connection.cursor()
-        cursor.execute(""" ALTER TABLE animals ADD %s %s;""" % sql_args)
+        cursor.execute(""" ALTER TABLE animals 
+			   ADD %s %s;""" % sql_args) # injection avoided above
         connection.commit()
-    
 
     def update_col(self, old_col_name, new_col_name, col_type, col_desc, col_group = None):
+	# Check to avoid injection
+	if not self.__col_exists(old_col_name):
+	   raise Exception("Column does not exist: " + old_col_name) 
         self.__validate_col_type(col_type)
         self.__validate_col_name(new_col_name)
         connection = self.connection
@@ -170,14 +188,14 @@ class subi_db_class:
         old_col_sql = string.joinfields(old_col_names,sep=",")
 
         #   update column in column_definitions table
-        sql_args = col_desc, col_type, col_group, new_col_name, old_col_name
+        sql_args = [col_desc, col_type, col_group, new_col_name, old_col_name]
         cursor = connection.cursor()
         cursor.execute("""  UPDATE  col_definitions
-                            SET     col_description = '%s'
-                            ,       col_type = '%s'
-                            ,       col_group = '%s'
-                            ,       col_name = '%s'
-                            WHERE   col_name = '%s';""" % sql_args)
+                            SET     col_description = ?
+                            ,       col_type = ?
+                            ,       col_group = ?
+                            ,       col_name = ?
+                            WHERE   col_name = ?;""", sql_args)
         connection.commit()
 
         #   this is used for the insert select query during col renaming
@@ -200,14 +218,14 @@ class subi_db_class:
         cursor = connection.cursor()
         cursor.execute("""  CREATE TABLE animals
                             (%s);
-                            """ % new_col_creation_sql )
+                            """ % new_col_creation_sql ) # injection avoided at the top
 
         sql_args = new_col_insertion_sql, old_col_sql
         cursor.execute("""  INSERT INTO animals
                             (%s)
                             SELECT  %s
                             FROM    temp_animals;
-                            """ % sql_args )
+                            """ % sql_args )  # injection avoided at the top
 
         cursor.execute("""  DROP TABLE temp_animals;""" )
         connection.commit()
@@ -215,12 +233,16 @@ class subi_db_class:
 
 
     def delete_col(self, col_name):
+	#   check column name to avoid injection
+	if not self.__col_exists(col_name):
+	   raise Exception("Column does not exist: " + col_name) 
+	
         #   update the column defs table
         connection = self.connection
         cursor = connection.cursor()
         cursor.execute("""  UPDATE  col_definitions
                             SET     active = 0
-                            WHERE   col_name = '%s';""" % col_name)
+                            WHERE   col_name = ?;""", [col_name])
         connection.commit()
 
         #   update the animals table
@@ -244,14 +266,14 @@ class subi_db_class:
         cursor = connection.cursor()
         cursor.execute("""  CREATE TABLE animals
                             (%s);
-                            """ % new_col_creation_sql )
+                            """ % new_col_creation_sql ) # injection avoided above
 
         sql_args = new_col_insertion_sql, new_col_insertion_sql
         cursor.execute("""  INSERT INTO animals
                             (%s)
                             SELECT  %s
                             FROM    temp_animals;
-                            """ % sql_args )
+                            """ % sql_args ) # injection avoided above
 
         cursor.execute("""  DROP TABLE temp_animals;""" )
         connection.commit()
@@ -266,27 +288,34 @@ class subi_db_class:
         connection = self.connection
         cursor = connection.cursor()
         cursor.execute(""" INSERT INTO animals (animal_id)
-                           VALUES ('%s');
-                          """ % animal_id)
+                           VALUES (?);
+                          """, [animal_id])
         connection.commit()
 
     
     def update_animal_field(self, animal_id, col_name, col_value):
+	# Explicitly check for column to prevent sql injection
+        if not self.__col_exists(col_name):
+            raise Exception("Column does not exist: " + col_name)
         connection = self.connection
         cursor = connection.cursor()
-        sql_args = col_name, col_value, animal_id
+        sql_args = [col_value, animal_id]
         cursor.execute(""" UPDATE animals
-                           SET    %s = '%s'
-                           WHERE  animal_id = '%s';
-                           """ % sql_args)
+                           SET    %s = ?
+                           WHERE  animal_id = ?;
+                           """ % col_name, sql_args)  # injection prevented above
         connection.commit()       
+
 
     def delete_animal(self, animal_id):
         connection = self.connection
         cursor = connection.cursor()
         cursor.execute(""" DELETE FROM animals
-                           WHERE  animal_id = '%s';
-                           """ % animal_id)
+                           WHERE  animal_id = ?;
+                           """, [animal_id])
+	# Check that an animal was deleted
+	if(cursor.rowcount == 0):
+	    raise Exception("No animals found with id: " + animal_id)
         connection.commit() 
 
 
@@ -299,8 +328,8 @@ class subi_db_class:
         cursor = connection.cursor() 
         cursor.execute("""SELECT *
                           FROM   animals
-                          WHERE  animal_id = '%s';
-                          """ % animal_id)
+                          WHERE  animal_id = ?;
+                          """, [animal_id])
         rows = cursor.fetchall()
         if len(rows) > 1:
             raise Exception("More than one matching animal_id was found. They should be unique.")
@@ -505,8 +534,5 @@ if __name__ == "__main__":
 
     print "Tests passed!"
     test_subi_object.close()
-
-
-
 
 
