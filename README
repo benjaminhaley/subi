@@ -15,22 +15,37 @@ Authors
 
 Table of Contents
 
+  0. Dependencies
+    
   1. Run subi
      * from windows exe
      * from mac app
      from build
 
   2. Build subi
-     for mac
-     * for windows
+     for mac or windows
      edit build setup
+
+
+#############################################################################
+
+Dependencies
+
+  Python 2.7
+  py2exe              # to build windows exe
+  py2app              # to build mac app
+  git                 # to work with files
+  computer
+    no server         # an existing server disrupts our temp server
+    admin access      # to setup a server we need admin access
 
 
 #############################################################################
 
 Run Subi
 
-  From Build
+  For mac
+  
     1. Build subi (instructions below)
 
     2. Kill any exisiting webservers (may be unecessary)
@@ -44,6 +59,16 @@ Run Subi
        sudo dist/Subi.app/Contents/MacOS/Subi
 
     5. Visit subi webpage
+       http://localhost/subi
+       
+  For Windows
+  
+    1. Build subi (instructions below)
+    
+    2. Launch subi server
+       subi/dist/subi.exe
+       
+    3. Visit subi webpage
        http://localhost/subi
 
 
@@ -60,7 +85,12 @@ Build subi
        rm -rf build/ dist/
 
     3. Build the app
+    
+       (for mac)
        python setup.py py2app     # Add -A to use source files
+       
+       (for windows)
+       python setup.py py2exe     # Add -A to use source files
 
 
   Edit build setup
