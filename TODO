@@ -1,5 +1,3 @@
-undo creation of timestamp table name
-
 expose db to ajax
   see:
     subi_db.py
@@ -31,5 +29,4 @@ app opens webpage
 public on ec2?
 dump and load backup
 reactivate columns
-
 
