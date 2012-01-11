@@ -1,5 +1,5 @@
 """
-Setup for py2app/py2exe
+Setup for or py2app/py2exe
 
 adapted from:
   http://svn.pythonmac.org/py2app/py2app/trunk/doc/index.html#py2app-options
@@ -20,27 +20,28 @@ Original Documentation
  Usage (Windows):
      python setup.py py2exe
 """
-from setup import ez_setup 
-ez_setup.use_setuptools()
 
 import sys
-from setuptools import setup
 
-mainscript = 'Subi.py'
+mainscript = 'subi.py'
 
 if sys.platform == 'darwin':
+    from setuptools import setup
     extra_options = dict(
         setup_requires=['py2app'],
         app=[mainscript],
         # Cross-platform applications generally expect sys.argv to
          # be used for opening files.
          options=dict(py2app=dict()),
-     )
-elif sys.platform == 'win32':
-    extra_options = dict(
-        setup_requires=['py2exe'],
-        app=[mainscript],
     )
+    setup(
+        name="Subi",
+        **extra_options
+    )
+elif sys.platform == 'win32':
+    from distutils.core import setup
+    import py2exe
+    setup(console=[mainscript])
 else:
     extra_options = dict(
         # Normally unix-like platforms will use "setup.py install"
@@ -48,9 +49,5 @@ else:
         scripts=[mainscript],
     )
 
-setup(
-    name="Subi",
-    **extra_options
-)
 
 
