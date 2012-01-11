@@ -6,22 +6,22 @@ expose db to ajax
     subi.py
     http://localhost/subi/ajax?command=add_colum
     sudo ./dist/subi.app/Contents/MacOS/subi
+    python db/subi_db.py
+  commands:
+    Insert animal
+      http://localhost/subi/ajax?command=insert_new_animal&animal_id=213
+    Delete animal
+      http://localhost/subi/ajax?command=delete_animal&animal_id=213	
+    Create VARCHAR(120)
+      http://localhost/subi/ajax?command=create_col&col_name=animal_description&col_type=VARCHAR(120)&col_desc=a test of varchar
+    Create DECIMAL(10,10)
+      http://localhost/subi/ajax?command=create_col&col_name=dose_rate&col_type=DECIMAL(10,10)&col_desc=dose rate in cGy per minute
+    Update column (by adding groups)
 
-Insert animal
-  http://localhost/subi/ajax?command=insert_new_animal&animal_id=213   
-Delete animal
-  http://localhost/subi/ajax?command=delete_animal&animal_id=213	
-Create VARCHAR(120)
-  http://localhost/subi/ajax?command=create_col&col_name=animal_description&col_type=VARCHAR(120)&col_desc=a test of varchar
+add sample entry
+   /sample/*.JPG
 
-Create DECIMAL(10,10)
-  http://localhost/subi/ajax?command=create_col&col_name=dose_rate&col_type=DECIMAL(10,10)&col_desc=dose rate in cGy per minute
 
-Update column (by adding groups)
-Create VARCHAR(120)
-
-	
-    
 check on windows
 translation
 jquery autofill
@@ -31,5 +31,5 @@ app opens webpage
 public on ec2?
 dump and load backup
 reactivate columns
-    
+
 
