@@ -2,23 +2,23 @@
 Setup for or py2app/py2exe
 
 adapted from:
-  http://svn.pythonmac.org/py2app/py2app/trunk/doc/index.html#py2app-options
+    http://svn.pythonmac.org/py2app/py2app/trunk/doc/index.html#py2app-options
 
-bmh Dec 2011
+author
+    bmh Dec 2011 - Jan 2012
 
+Usage 
+    (Mac OS X):
+    python setup.py py2app
 
-Original Documentation
-
- py2app\py2exe build script for MyApplication.
-
- Will automatically ensure that all build prerequisites are available
- via ez_setup
-
- Usage (Mac OS X):
-     python setup.py py2app
-
- Usage (Windows):
-     python setup.py py2exe
+    (Windows):
+    python setup.py py2exe
+    
+TODO
+    The current setup is garbage.
+    Remove redundancy between win and mac setups.
+    Save windows from explictly naming each data file
+    
 """
 
 import sys
@@ -41,9 +41,41 @@ if sys.platform == 'darwin':
         **extra_options
     )
 elif sys.platform == 'win32':
-    from distutils.core import setup
+    from setuptools import setup
     import py2exe
-    setup(console=[mainscript])
+    extra_options = dict(
+        setup_requires=['py2exe'],
+        data_files=[
+            ('web', 
+                [
+                    r'web\\404.html',
+                    r'web\\favicon.ico',
+                    r'web\\subi.html',
+                    r'web\\upload.html',
+                ]
+            ),
+            ('web\\css\\bootstrap', 
+                [
+                    r'web\\css\\bootstrap\\bootstrap.min.css',
+                    r'web\\css\\bootstrap\\bootstrap.css'
+                ]
+            )
+        ],
+        console=[mainscript],
+
+        #exe=[mainscript],
+        # Cross-platform applications generally expect sys.argv to
+        # be used for opening files.
+        options=dict(py2exe=dict(
+            )),
+    )
+    setup(
+        name="Subi.exe",
+        **extra_options
+    )
+    #from distutils.core import setup
+    #import py2exe
+    #setup(console=[mainscript])
 
 
 
