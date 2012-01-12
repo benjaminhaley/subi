@@ -60,14 +60,14 @@ Run Subi
 
     5. Visit subi webpage
        http://localhost/subi
-       
+
   For Windows
-  
+
     1. Build subi (instructions below)
-    
+
     2. Launch subi server
        subi/dist/subi.exe
-       
+
     3. Visit subi webpage
        http://localhost/subi
 
@@ -85,10 +85,10 @@ Build subi
        rm -rf build/ dist/
 
     3. Build the app
-    
+
        (for mac)
        python setup.py py2app     # Add -A to use source files
-       
+
        (for windows)
        python setup.py py2exe     # Add -A to use source files
 
