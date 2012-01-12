@@ -20,7 +20,6 @@ add sample entry
    /sample/*.JPG
 
 
-check on windows
 translation
 jquery autofill
 sorttable
@@ -29,4 +28,10 @@ app opens webpage
 public on ec2?
 dump and load backup
 reactivate columns
-
+xfer to windows
+    on janus server
+    shut down apache
+    shut down webroot
+    open git bash (cd subi)
+    open cmd (cd subi)
+    open passwords.kdb
