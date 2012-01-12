@@ -31,8 +31,10 @@ if sys.platform == 'darwin':
         setup_requires=['py2app'],
         app=[mainscript],
         # Cross-platform applications generally expect sys.argv to
-         # be used for opening files.
-         options=dict(py2app=dict()),
+        # be used for opening files.
+        options=dict(py2app=dict(
+            resources=['web', 'db'],
+            )),
     )
     setup(
         name="Subi",
@@ -42,12 +44,6 @@ elif sys.platform == 'win32':
     from distutils.core import setup
     import py2exe
     setup(console=[mainscript])
-else:
-    extra_options = dict(
-        # Normally unix-like platforms will use "setup.py install"
-        # and install the main script as such
-        scripts=[mainscript],
-    )
 
 
 

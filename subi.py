@@ -8,7 +8,8 @@
 #   Ben Haley - Dec 2011
 #   <benjamin.haley@gmail.com> 
 
-webdir = '../../../../web'
+webdir = 'web'
+home_url = 'http://localhost/subi'
 
 import string,cgi,time
 from os import curdir, sep
@@ -72,9 +73,12 @@ class MyHandler(BaseHTTPRequestHandler):
             self.wfile.write(f.read())
             f.close()
             return
-                
+
         except IOError:
-            self.send_error(404,'File Not Found: %s.  Please visit localhost/subi.html ' % self.path)
+            self.send_error( 404,
+                             'File Not Found: %s.  Please visit %s ' 
+                             % (self.path, home_url)
+                           )
 
     def do_AJAX(self):
         """
@@ -96,7 +100,6 @@ class MyHandler(BaseHTTPRequestHandler):
             command = q['command'][0]
             print("command: " + command)
 
-        
         # Execute command
         try:
             if command == "NO COMMAND SENT":
