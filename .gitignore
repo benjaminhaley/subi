@@ -8,7 +8,7 @@ build/
 *.pyc
 
 # No data in the repo
-subi.db
+data/
 
 # Ignore helper files
 .DS_store

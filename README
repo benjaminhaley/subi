@@ -1,82 +1,70 @@
 #############################################################################
 
 SUBI README
-  Notes for developers on the
-  Subi data entry and retrival system
-  See table of contents below
+  Notes for users and developers on the Subi data entry and retrival system
+  Most users will only be interested in the basic installation instructions.
+  See the table of contents below.
+
+ABOUT SUBI
+  subi is made to make it easy to digitize a radiobiology archive and search
+  through the results.  Usage instructions are baked into the application.
+  This README shows how to get subi running.
+
+Copyright
+  This work is licensed under the Creative Commons Attribution 3.0 Unported 
+  License. To view a copy of this license, visit 
+  http://creativecommons.org/licenses/by/3.0/ or send a letter to 
+  Creative Commons, 444 Castro Street, Suite 900, 
+  Mountain View, California, 94041, USA.
+
+  *(this basically means anyone can use this work for any purpose)
 
 Authors
-  bmh and dp Dec 2011
-  benjamin.haley@gmail.com
-  daveponet@gmail.com
+  Benjamin Haley (bmh) <benjamin.haley@gmail.com>
+  Dave Paunesku (dp) <daveponet@gmail.com>
+  Dec 2011 - Jan 2011
 
 
 #############################################################################
 
 Table of Contents
+  (* indicates not written)
 
-  0. Dependencies
-    
-  1. Run subi
-     * from windows exe
-     * from mac app
-     from build
+  1. (* Basic installation)
 
-  2. Build subi
-     for mac or windows
-     edit build setup
+  2. Run from script
+
+  3. Build subi app
 
 
 #############################################################################
 
-Dependencies
+Basic Installation
 
-  Python 2.7
-  py2exe              # to build windows exe
-  py2app              # to build mac app
-  git                 # to work with files
-  computer
-    no server         # an existing server disrupts our temp server
-    admin access      # to setup a server we need admin access
-
+  Not written yet
+  On windows we may require them to copy a shortcut from a folder.
+  It has problems launching out of context.
 
 #############################################################################
 
-Run Subi
+Build 
+  If you are a developer you might want to build the working app after
+  changing code.  The following should help.
 
-  For mac
-  
-    1. Build subi (instructions below)
+  Dependencies
+    You will need the following tools to work on subi.
 
-    2. Kill any exisiting webservers (may be unecessary)
-       ps -a                      # find the process id of the webserver
-       e.g. sudo kill -9 24234    # if the process id was 24234
+    Python 2.7
+    setuptools          # for any build
+    py2exe              # to build windows exe
+    py2app              # to build mac app
+    git                 # to work with files
+    a computer
+      with no server    # an existing server disrupts our temp server
+      with admin access # to setup a server we need admin access
 
-    3. Change into subi directory
-       e.g. cd subi
-
-    4. Launch subi server
-       sudo dist/Subi.app/Contents/MacOS/Subi
-
-    5. Visit subi webpage
-       http://localhost/subi
-
-  For Windows
-
-    1. Build subi (instructions below)
-
-    2. Launch subi server
-       subi/dist/subi.exe
-
-    3. Visit subi webpage
-       http://localhost/subi
-
-
-#############################################################################
-
-Build subi
-
-  To build a mac or windows application
+  Build and Run Subi
+    Follow the following steps to build the subi app.
 
     1. Start in subi directory
        e.g. cd subi/
@@ -92,14 +80,17 @@ Build subi
        (for windows)
        python setup.py py2exe     # Add -A to use source files
 
+    4. Kill any exisiting webservers (may be unecessary)
 
-  Edit build setup
+    5. Launch subi server
 
-    setup.py code was borrowed from 
-    http://svn.pythonmac.org/py2app/py2app/trunk/doc/index.html#self-bootstrapping
-    It is made to setup both windows and mac.
-    There are many options that can be changed.
-    Just be sure to avoid the option ARGV which kills mac
+       (for mac)
+       sudo dist/Subi.app/Contents/MacOS/Subi
 
+       (for windows)
+       dist/subi.exe
+
+    6. Visit subi webpage
+       http://localhost/subi
 
 #############################################################################

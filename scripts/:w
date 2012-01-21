@@ -58,11 +58,6 @@
         width:100%;
       }
 
-      /* My buttons need a little buffer */
-      .create {
-          margin: 9px;
-      }
-
     </style>
 
   </head>
@@ -74,10 +69,11 @@
     <div class="topbar">
       <div class="fill">
         <div class="container">
-          <a class="brand" href="subi">subi</a>
+          <a class="brand" href="#">subi</a>
           <ul class="nav">
-            <li class="active"><a href="">Home</a></li>
+            <li class="active"><a href="#">Home</a></li>
             <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
           </ul>
         </div>
       </div>
@@ -123,7 +119,7 @@
             var dict = new Object();
 
             // get the current url hash value (remove the #)
-            var hash = window.location.hash;
+            hash = window.location.hash;
             hash = hash.substring(1, hash.length);
 
             // if hash is empty return an empty dictionary
@@ -132,11 +128,11 @@
             }
 
             // convert
-            var pairs = hash.split('&');
+            pairs = hash.split('&');
             for (p in pairs)
             {
-                var param = pairs[p].split('=')[0];
-                var value = pairs[p].split('=')[1];
+                param = pairs[p].split('=')[0];
+                value = pairs[p].split('=')[1];
 
                 dict[param] = value;
             }
@@ -146,10 +142,10 @@
 
         function dict2hash(dict)
         {
-            var hash = "";
+            hash = "";
             for (var param in dict)
             {
-                var hash = hash + param + '=' + dict[param] + "&";
+                hash = hash + param + '=' + dict[param] + "&";
             }
 
             // remove the final '&'
@@ -160,15 +156,15 @@
 
         function write_url(param, value)
         {
-            var dict = hash2dict();
+            dict = hash2dict();
             dict[param] = value;
             dict2hash(dict);
         }
 
         function read_url(param, default_value)
         {
-            var dict = hash2dict();
-            var value = dict[param];
+            dict = hash2dict();
+            value = dict[param];
             if (is_in_url(param)){
                 return value;
             } else {
@@ -178,8 +174,8 @@
 
         function is_in_url(param)
         {
-            var dict = hash2dict();
-            var value = dict[param];
+            dict = hash2dict();
+            value = dict[param];
             if (undefined === value){
                 return false;
             } else {
@@ -190,7 +186,7 @@
         function get_animal_textarea(text, id)
         {
             // Force string to text
-            var text = String(text);
+            text = String(text);
 
             // Choose a reasonable height
             var baseheight = 12;
@@ -211,11 +207,20 @@
             return animal_textarea;
         }
 
+        function bind_click_highlight(id)
+        {
+            // Bind click event so all text is highlighted
+            // this will allow users to quickly replace values
+            $('#' + id).click(function(){
+                this.select();
+            });
+        }
+
         function bind_animal_autocomplete(id)
         {
             // Extract column name from id
-            var id = $("#" + id).attr('id');
-            var column = id.substring('animal_text_area_'.length);
+            id = $("#" + id).attr('id');
+            column = id.substring('animal_text_area_'.length);
 
             // Construct a request url
             var url = 'subi/ajax?' + 
@@ -249,10 +254,9 @@
         function bind_update_animal_field(id)
         {
             // Get animal id and column name from the page
-            var animal = $("#loaded_animal").data('loaded_animal');
-            var animal_id = animal['animal_id'];
-            var column = $("#" + id).attr('id').substring('animal_text_area_'.length);
-            var value = $("#" + id).attr('value').trim();
+            animal_id = $("#animal_text_area_animal_id").attr('value');
+            column = $("#" + id).attr('id').substring('animal_text_area_'.length);
+            value = $("#" + id).attr('value').trim();
 
             // Construct a request url
             var url = 'subi/ajax?' + 
@@ -268,20 +272,6 @@
 
                 if (is_error) {
                     handle_error(response['error']);
-                } else {
-                    // be sure to update the page if the animal id 
-                    // was changed
-                    // this is pretty hacky stuff.  In reality we should
-                    // not tie the permanant animal identifier that we use
-                    // to the one the user uses
-                    if (url.indexOf('col_name=animal_id') !== -1){
-                        var new_animal_id = url.substring(url.indexOf('col_value=') + 'col_value='.length);
-                        var animal = $("#loaded_animal").data('loaded_animal');
-                        animal['animal_id'] = new_animal_id;
-                        var new_search_terms = 'animal_id:' + new_animal_id;
-                        write_search(new_search_terms);
-                        write_url('search_terms', new_search_terms);
-                    }
                 }
             });
         }
@@ -289,17 +279,17 @@
         function bind_col_update(id, value, settings){
 
             // strip whitespace from value
-            var value = $.trim(value);
+            value = $.trim(value);
 
-            var col_name = id.substring('animal_column_'.length);
-            var url =   'subi/ajax?' +
-                        'command=update_col&' +
-                        'col_name=' + col_name + '&' +
-                        'field_name=col_description&' +
-                        'field_value=' + value;
+            col_name = id.substring('animal_column_'.length);
+            url = 'subi/ajax?' +
+                'command=update_col&' +
+                'col_name=' + col_name + '&' +
+                'field_name=col_description&' +
+                'field_value=' + value;
 
             // Request the results
-            var is_success = $.getJSON(url, function(response) {
+            is_success = $.getJSON(url, function(response) {
 
                 var is_error = check_error(response);
 
@@ -326,14 +316,14 @@
             $("#" + create_col_id).click(function(){
 
                 // fetch column to create
-                var col_name = $(this).attr('id').substring('create_column_'.length);
+                col_name = $(this).attr('id').substring('create_column_'.length);
 
                 // compose delete url
-                var url = 
+                url = 
                     "subi/ajax?" + 
                     "command=create_col&" +
                     "col_type=VARCHAR(120)&" +
-                    "col_desc=Click to edit&" +
+                    "col_desc=Frick to edit&" +
                     "col_name=" + col_name;
 
                 // engage
@@ -357,10 +347,10 @@
         function bind_delete_col(delete_col_id)
         {
             // Special confirmation id to avoid confusion
-            var delete_confirmation_id = 'confirm_' + delete_col_id;
+            delete_confirmation_id = 'confirm_' + delete_col_id;
 
             // Give the user a second chance
-            var confirmation_msg = 
+            confirmation_msg = 
                 "Are you sure you want to delete this value for all animals? " + 
                 "<br/><a href='javascript:void(0)' " + 
                 "id=" + delete_confirmation_id + " " +
@@ -376,10 +366,10 @@
             $("#" + delete_confirmation_id).click(function(){
                 
                 // fetch column to delete
-                var col_name = $(this).attr('id').substring('confirm_delete_column_'.length);
+                col_name = $(this).attr('id').substring('confirm_delete_column_'.length);
 
                 // compose delete url
-                var url = 
+                url = 
                     "subi/ajax?" + 
                     "command=delete_col&" +
                     "col_name=" + col_name;
@@ -406,19 +396,16 @@
                 "id='" + delete_col_id + "'" + 
                 "class='small close'" +        // look like a close
                 ">x</a>";
-
             return(link);
         }
 
         function get_create_col_link(create_col_id)
         {
-            var link = 
-                "<a " +
+            link = "<a " +
                 "href='javascript:void(0)'" +  // make it appear clickable 
                 "id='" + create_col_id + "'" + 
                 "class='small close'" +        // look like a close
-                ">+</a>";
-
+                ">+ add field</a>";
             return(link);
         }
 
@@ -426,19 +413,19 @@
         // and bind controls to manipulate this attribute
         function write_animal_field(animal, col_info, col_name)
         {
-            // A null animal has nothing to write
-            if (typeof animal === "undefined"){
-                return false;
-            }
-
            // Extract useful terms
             var value = animal[col_name];
             var col_description = '';
             for (i in col_info){
-                var col = col_info[i];
+                col = col_info[i];
                 if (col['col_name'] === col_name){
-                    var col_description = col['col_description'];
+                    col_description = col['col_description'];
                 }
+            }
+
+            // Temporarily add spaces
+            if (value != null){
+                value = String(value).replace(/[ABCDEF]/g, " ");
             }
 
             // Convert nulls to black lines for readablity
@@ -452,9 +439,9 @@
 
             // Don't allow people to delete the animal_id
             if (col_name === 'animal_id'){
-                var delete_col_link = '';
+                delete_col_link = '';
             } else {
-                var delete_col_link = get_delete_col_link(delete_col_id);
+                delete_col_link = get_delete_col_link(delete_col_id);
             }
 
             $("#animal").find('tbody').append(
@@ -465,6 +452,10 @@
                     "</tr>"
                     );
 
+            // Bind click event so all text is highlighted
+            // this will allow users to quickly replace values
+            bind_click_highlight(id);
+
             // Bind autocomplete when focused on
             // This way we use ajax as needed
             $("#" + id).focus(function(){
@@ -472,7 +463,7 @@
             });
 
             // Update db when element is changed
-            $("#" + id).blur(function() {
+            $("#" + id).change(function() {
                 bind_update_animal_field($(this).attr('id'));
             });
 
@@ -480,7 +471,7 @@
             $("#" + col_id).editable(function(value, settings){
                 value = bind_col_update($(this).attr('id'), value, settings)
                 return value;
-                }, {onblur   : 'submit'}
+                }, {tooltip   : 'Click or die...'}
             );
 
             // Allow users to delete Columns
@@ -517,19 +508,12 @@
         // change properties of the animal
         function write_animal(animal, col_info)
         {
-
-            // Tell the world (make it globally accessible)
-            $("#loaded_animal").data('loaded_animal', animal);
-
             // Clear existing animal
             $("#animal").find('tbody').html("");
 
             // Write in new animal
-            // Iterate over col_info (as oposed to animal)
-            // to get the order right
-            for (col in col_info)
+            for (col_name in animal)
             {
-                col_name = col_info[col]['col_name']
                 write_animal_field(animal, col_info, col_name);
             }
 
@@ -551,28 +535,18 @@
             $("#" + create_col_id).click(function(){
                 bind_create_col($(this).attr('id'))
             });
-
         }
 
-        function write_animal_to_search_status(animal_id)
+                        write_animal_to_status(response['data']['animal_id']);
+
+        function write_animal_to_status(animal_id)
         {
             // Add count to page and links to go forwards and back
-            if (typeof animal_id !== "undefined"){
-                search_status_html = '';
-            } else {
-                search_status_html = 'No animals found.';
-            }
-            $("#search_status").html(search_status_html);
+            status_html = 'Animal with id: ' + animal_id;
+            $("#status").html(status_html);
         }
 
-        function clear_search_status()
-        {
-            // Add count to page and links to go forwards and back
-            search_status_html = '';
-            $("#search_status").html(search_status_html);
-        }
-
-        function write_count_to_search_status(count, offset)
+        function write_count_to_status(count, offset)
         {
             // Make a human readable count
             var offset = parseInt(read_url('offset'));
@@ -580,12 +554,12 @@
             var count = parseInt(count);
 
             // Add count to page and links to go forwards and back
-            search_status_html = '';
+            status_html = '';
 
             // Deal with the case that no animals were found
             if (count === 0)
             {
-                search_status_html = "No animals found.";
+                status_html = "No animals found.";
             }
 
             // Deal with the case that animals were found
@@ -593,35 +567,30 @@
             {
                 // Show previous button if applicable
                 if (result_number > 1){
-                    search_status_html += 
+                    status_html += 
                         "<a " +
                         "id='prev' " +
                         "href='javascript:void(0)' " +   // change pointer to selector
                         "tabindex='-1'" +                // allow tab to jump straight to inputs
                         ">previous</a> ";
-                } else {
-                    search_status_html += "<span class='muted'>previous</span>";
                 }
-                
 
                 // Always show count
-                search_status_html += " . Animal " + result_number + " of " + count + " . ";
+                status_html += " . Animal " + result_number + " of " + count + " . ";
 
                 // Show next button if applicaable
                 if (result_number < count){
-                    search_status_html += 
+                    status_html += 
                         "<a " + 
                         "id='next' " + 
                         "href='javascript:void(0)'" +    // change pointer to glove
                         "tabindex='-1'" +                // allow tab to jump straight to inputs
                         ">next</a>";
-                } else {
-                    search_status_html += "<span class='muted'>next</span>";
                 }
             }
 
-            // Actually write count to search_status
-            $("#search_status").html(search_status_html);
+            // Actually write count to status
+            $("#status").html(status_html);
 
             // Bind events to forwards and back links
             search_terms = read_url('search_terms');
@@ -643,18 +612,10 @@
 
         function handle_error(error)
         {
-            // Some errors we recognize
-            // otherwise they should be forwarded
-
-            // check for redundant animal id
-            if (error.indexOf('column animal_id is not unique') !== -1){
-                message = "That id is already in use.  Please select another.";
-            } else {
-                message = 
-                    "There has been an error: <br/>"
-                    + "<small>" + error + "'" + "</small><br/>"
-                    + "Email this error message to benjamin.haley@gmail.com";
-            }
+            message = 
+                "There has been an error: <br/>"
+                + "<small>" + error + "'" + "</small><br/>"
+                + "Email this error message to benjamin.haley@gmail.com";
 
             notify(message);
         }
@@ -681,12 +642,17 @@
 
             // Let the user know you are looking
             $("#animal").find('tbody').html("");
-            $("#search_status").html("loading...");
+            $("#status").html("loading...");
 
             // Write the search terms into the url for back button support
             write_url('search_terms', search_terms);
 
             // Determine how to search
+
+            // Don't search for nothing
+            if (search_terms.length < 1){
+                return null
+            }
 
             // We must make a special path to search for an animal
             is_id_request = ('animal_id:' === search_terms.substring(0, 'animal_id:'.length));
@@ -715,16 +681,16 @@
                 if (is_error) {
                     handle_error(response['error']);
                 } else {
-                    // Write animal after we are sure we have column data
+                    // Write animal after we are sure we have column
+                    // data, usually this will be cached.
                     get_col_info(function(col_info){
-                        write_animal(response['data'][0], col_info);
-                        if (typeof response['data'][0] !== "undefined"){
-                            write_animal_to_search_status(response['data'][0]['animal_id']);
-                        }
+                        write_animal(response['data'], col_info);
+                        write_animal_to_status(response['data']['animal_id']);
                     });
                }
             })
         }
+
 
         function search_by_fulltext(search_terms)
         {
@@ -752,7 +718,7 @@
                     // data, usually this will be cached.
                     get_col_info(function(col_info){
                         write_animal(response['data']['animals'][0], col_info);
-                        write_count_to_search_status(response['data']['count'], offset);
+                        write_count_to_status(response['data']['count'], offset);
                     });
                }
             })
@@ -761,6 +727,12 @@
         // Load column descriptions so they can always be found
         function get_col_info(callback)
         {
+            // try to retrieve from cache when possible
+            cached_info = $("#col_info").data('col_info');
+            if (typeof cached_info !== "undefined"){
+                callback(cached_info);
+            }
+
             var url = 'subi/ajax?' + 
                       'command=col_info';
             $.getJSON(url, function(response) {
@@ -772,204 +744,11 @@
                 } else {
                     var col_info = response['data'];
 
+                    // Store it in the DOM for later
+                    $("#col_info").data('col_info', col_info);
                     callback(col_info);
                 }
             });
-        }
-
-        // Give the user the tools to make new animals
-        // copy animals or delete animals.
-        function write_create()
-        {
-            // Always allow us to create a new animal
-            var new_animal_id = get_rand_name();
-            insert_animal_id = 'insert_animal_' + new_animal_id;
-            html = get_insert_animal_link(insert_animal_id);
-
-            // If an animal is loaded, let us delete or copy it
-            var animal = $("#loaded_animal").data('loaded_animal');
-            if (typeof animal !== "undefined"){
-
-                // identify the loaded animal
-                var loaded_animal_id = animal['animal_id'];
-
-                // Allow animal copies
-                copy_animal_id = 'copy_animal_' + new_animal_id;
-                html += get_copy_animal_link(copy_animal_id);
-
-                // Allow animal delete
-                delete_animal_id = 'delete_animal_' + loaded_animal_id;
-                html += get_delete_animal_link(delete_animal_id);
-            }
-
-            // Finally write and bind the elements
-
-            // write the buttons
-            $("#commands").html(html);
-            bind_insert_animal(insert_animal_id);
-
-            if (typeof animal !== "undefined"){
-                bind_copy_animal(copy_animal_id);
-                bind_delete_animal(delete_animal_id);
-            }
-        }
-
-        // User should be able to start a new animal
-        function bind_insert_animal(insert_animal_id)
-        {
-            $("#" + insert_animal_id).click(function(){
-
-                // fetch animal to delete
-                animal_id = $(this).attr('id').substring('insert_animal_'.length);
-
-                // compose insert ajax call
-                url = 
-                    "subi/ajax?" + 
-                    "command=insert_new_animal&" +
-                    "animal_id=" + animal_id;
-
-                // Update the search terms so we look for 
-                // the new animal on reload
-                search_terms = 'animal_id:' + animal_id;
-                write_url('search_terms', search_terms);
-
-                // engage
-                $.getJSON(url, function(response) {
-
-                    var is_error = check_error(response);
-
-                    if (is_error) {
-                        handle_error(response['error']);
-                    } else {
-                        // reload to get new animal
-                        load_page();
-                    }
-                });
-            });
-        }
-
-
-        // Allow the user to make a copy of the animal they are
-        // currently looking at
-        function bind_copy_animal(copy_animal_id)
-        {
-            $("#" + copy_animal_id).click(function(){
-
-                // fetch new animal id
-                copy_id = $(this).attr('id').substring('copy_animal_'.length);
-
-                // fetch loaded animal id
-                var animal = $("#loaded_animal").data('loaded_animal');
-                origin_id = animal['animal_id'];
-
-                // Update the search terms so we look for 
-                // the new animal on reload
-                search_terms = 'animal_id:' + copy_id;
-                write_url('search_terms', search_terms);
-
-                // compose copy url
-                url = 
-                    "subi/ajax?" + 
-                    "command=copy_animal&" +
-                    "origin_id=" + origin_id + "&" +
-                    "copy_id=" + copy_id;
-
-                // engage
-                $.getJSON(url, function(response) {
-
-                    var is_error = check_error(response);
-
-                    if (is_error) {
-                        handle_error(response['error']);
-                    } else {
-                        // reload to clear dead column
-                        load_page();
-                    }
-                });
-            });
-        }
-
-        // We want to make it hard to accidentally delete an animal
-        // so there will be an extra notification step
-        function bind_delete_animal(delete_animal_id)
-        {
-            $("#" + delete_animal_id).click(function(){
-                // Special confirmation id to avoid confusion
-                delete_confirmation_id = 'confirm_' + delete_animal_id;
-
-                // Give the user a second chance
-                confirmation_msg = 
-                    "Are you sure you want to permanantly delete this animal? " + 
-                    "<br/><a href='javascript:void(0)' " + 
-                    "id=" + delete_confirmation_id + " " +
-                    "class='btn danger close_notify'" + ">" +
-                    "Delete" + "</a>" +
-                    " or <a href='javascript:void(0)' " + 
-                    "class='btn close_notify'" + ">" + 
-                    "Cancel" + "</a>";
-
-                notify(confirmation_msg);
-
-                // Give them the right to execute
-                $("#" + delete_confirmation_id).click(function(){
-
-                    // fetch animal to delete
-                    animal_id = $(this).attr('id').substring('confirm_delete_animal_'.length);
-
-                    // compose delete url
-                    url = 
-                        "subi/ajax?" + 
-                        "command=delete_animal&" +
-                        "animal_id=" + animal_id;
-
-                    // engage
-                    $.getJSON(url, function(response) {
-
-                        var is_error = check_error(response);
-
-                        if (is_error) {
-                            handle_error(response['error']);
-                        } else {
-                            // reset search terms and reload to clear
-                            // deleted animal
-                            search_terms = '';
-                            write_url('search_terms', '');
-                            write_url('offset', 0);
-                            load_page();
-                        }
-                    });
-                });
-            });
-        }
-
-        function get_insert_animal_link(insert_animal_id)
-        {
-            link = "<a " +
-                "href='javascript:void(0)' " +  // make it appear clickable 
-                "id='" + insert_animal_id + "' " + 
-                "class='btn create primary' " +        // look like a close
-                ">Create new animal</a>";
-            return(link);
-        }
-
-        function get_copy_animal_link(copy_animal_id)
-        {
-            link = "<a " +
-                "href='javascript:void(0)' " +  // make it appear clickable 
-                "id='" + copy_animal_id + "' " + 
-                "class='btn create' " +        // look like a close
-                ">Copy this animal</a>";
-            return(link);
-        }
-
-        function get_delete_animal_link(delete_animal_id)
-        {
-            link = "<a " +
-                "href='javascript:void(0)' " +  // make it appear clickable 
-                "id='" + delete_animal_id + "' " + 
-                "class='btn danger create' " +         // think twice
-                ">Delete this animal</a>";
-            return(link);
         }
 
 
@@ -977,15 +756,12 @@
         {
             // Search for terms
             var offset = read_url('offset', 0);
-            var search_terms = read_url('search_terms', '');
+            var search_terms = read_url('search_terms');
             write_search(search_terms);
             search(search_terms);
 
             // Focus on search bar
             $("#search").select();
-
-            // Give tools for creation
-            write_create();
         }
 
         // Handle a page load
@@ -1002,13 +778,10 @@
             return false;
         });
 
-        // Make sure we refresh creation tools when animals are loaded
-        $("#loaded_animal").bind('changeData', function(){
-            var animal = $("#loaded_animal").data('loaded_animal');
-            write_create();
-        });
-
-        load_page();
+        // Handle an anchor change (e.g. localhost#old -> localhost#new)
+        window.onhashchange = function(){
+            load_page();
+        }
 
    });
 
@@ -1016,7 +789,6 @@
 
           <!-- Invisible fields for data storage -->
           <span id="col_info"></span>
-          <span id="loaded_animal"></span>
 
           <!-- Search form -->
           <form id="search_form" class="form-stacked" action="">
@@ -1024,48 +796,39 @@
               <div class="clearfix">
                 <div class="input">
                   <input class="xlarge span9" id="search" type="text" placeholder="search"/>
+                  <input name="command" type="hidden" value="search_fulltext"/>
                 </div>
               </div><!-- /clearfix -->
             </fieldset>
           </form>
 
-          <div class="row">
-              <p id="search_status" class="span5"></p>
-          </div>
+          <div id="status" class="span10"></div>
           <table class="span10" id="animal">
               <tbody>
               </tbody>
           </table>
 
           </div>
-          <div class="span3" id="commands" >
-          </div>
-        </div>
-      </div>
-
-      <footer class=''>
+          <div class="span4">
+            <h3>Introduction</h3>
             <p>
-            Built by 
-            <a href='http://janus.northwestern.edu/wololab/index.php?go=bioBen'>Ben Haley</a> 
-            and 
-            <a href='http://janus.northwestern.edu/wololab/index.php?go=bioDave'>Dave Paunesku</a> 
-            using 
-            <a href='http://python.org/'>python</a>, 
-            <a href='http://www.sqlite.org/'>sqllite</a>, 
-            <a href='http://twitter.github.com/bootstrap/'>bootstrap</a>, 
-            <a href='http://jquery.com/'>jquery</a>, and 
-            <a href='http://www.appelsiini.net/projects/jeditable'>jeditable</a>
-            as a gift to the radiobiology researchers at The Southern Urals 
-            Biophysics Institute courtesy of the 
-            <a href='http://janus.northwestern.edu/wololab/'>Woloschak Laboratory</a>
-            and the 
-            <a href='http://energy.gov/'>U.S. Department of Energy</a>
+              Built by Ben Haley, and Dave Paunesku
+              for the radiobiology researchers at
+              The Southern Urals Biophysics Institute.
+              Courtesy of the 
+              <a href='http://janus.northwestern.edu/wololab/'>Woloschak Laboratory</a>
+              and the U.S. Department of Energy.
             </p>
             <p>
               For questions contact
               benjamin.haley@gmail.com
-            </p>
- 
+              </p>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+      <p>Ask Gayle what should go here acknowledge funders, contact info, etc.</p>
       </footer>
 
     </div> <!-- /container -->

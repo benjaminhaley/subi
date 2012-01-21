@@ -1,37 +1,84 @@
-expose db to ajax
-  see:
-    subi_db.py
-    subi.py
-    http://localhost/subi/ajax?command=add_colum
-    sudo ./dist/subi.app/Contents/MacOS/subi
-    python db/subi_db.py
+make web interface
   commands:
     Insert animal
-      http://localhost/subi/ajax?command=insert_new_animal&animal_id=213
+        http://localhost/subi/ajax?command=insert_new_animal&animal_id=213
+        http://localhost/subi/ajax?command=insert_new_animal&animal_id=Феликс Дзержинский
+    Animal Exists
+        http://localhost/subi/ajax?command=animal_exists&animal_id=213
     Delete animal
-      http://localhost/subi/ajax?command=delete_animal&animal_id=213	
+        http://localhost/subi/ajax?command=delete_animal&animal_id=213	
+    Copy animal
+        http://localhost/subi/ajax?command=copy_animal&origin_id=213&copy_id=214
+    Lookup animal
+        http://localhost/subi/ajax?command=lookup_animal&animal_id=213	
     Create VARCHAR(120)
-      http://localhost/subi/ajax?command=create_col&col_name=animal_description&col_type=VARCHAR(120)&col_desc=a test of varchar
+        http://localhost/subi/ajax?command=create_col&col_name=animal_description&col_type=VARCHAR(120)&col_desc=a test of varchar
     Create DECIMAL(10,10)
-      http://localhost/subi/ajax?command=create_col&col_name=dose_rate&col_type=DECIMAL(10,10)&col_desc=dose rate in cGy per minute
-    Update column (by adding groups)
+        http://localhost/subi/ajax?command=create_col&col_name=dose_rate&col_type=DECIMAL(10,10)&col_desc=dose rate in cGy per minute
+    Update column (add to demographics group)
+        can update: col_name, col_type, col_description, or col_group
+        http://localhost/subi/ajax?command=update_col&col_name=dose_rate&field_name=col_name&field_value=dose_rate_updated
+        http://localhost/subi/ajax?command=update_col&col_name=dose_rate_updated&field_name=col_type&field_value=DECIMAL(10,10)
+        http://localhost/subi/ajax?command=update_col&col_name=dose_rate_updated&field_name=col_description&field_value=updated description
+        http://localhost/subi/ajax?command=update_col&col_name=dose_rate_updated&field_name=col_group&field_value=updated group
+    Delete column
+        http://localhost/subi/ajax?command=delete_col&col_name=dose_rate
+    Update Animal Field
+        (assuming 213 and animal_description exist)
+        http://localhost/subi/ajax?command=update_animal_field&animal_id=213&col_name=animal_description&col_value=updated description
+    Get all column info
+        http://localhost/subi/ajax?command=col_info
+    Get unique values in a column of animal
+        http://localhost/subi/ajax?command=get_unique_col_values&col_name=animal_id
+
+        For min_freq > 2 in big table
+        http://localhost/subi/ajax?command=get_unique_col_values&col_name=aa&min_freq=2
+    Search for animals (fulltext)
+        http://localhost/subi/ajax?command=search_fulltext&search_terms=updated&limit=1&offset=0
+    Backup db
+        http://localhost/subi/ajax?command=backup_db
+    List backups (with size)
+        http://localhost/subi/ajax?command=list_backups
+    Delete backup
+        get an appropriate filename from list backups
+        http://localhost/subi/ajax?command=delete_backup&filename=subi_backup_1326735456.61_Mon_Jan_16_11:37:36_2012
+    Download backup
+        get an appropriate filename from list backups
+        http://localhost/subi/data?filename=subi_backup_1326735438.12_Mon_Jan_16_11:37:18_2012
+    Upload backup (may need post)
+        should post to urls
+        (might have to get valid filename from list backups)
+    Restore backup
+        http://localhost/subi/ajax?command=load_db&filename=subi_backup_1326735271.61_Mon_Jan_16_11:34:31_2012
+        will return a filename of a newly made backup
+        http://localhost/subi/ajax?command=load_db&filename=subi_backup_big_test
+        http://localhost/subi/ajax?command=load_db&filename=subi_backup_fresh_start
+
+Later
+    jslint
+    refactor
+    cache count results to increase speed (seperate from search for 1)
+    Record command / response history ... offer to email it to me if we raise an
+    translation
+    add password protections to manipulate data
 
 add sample entry
    /sample/*.JPG
-
-
-translation
-jquery autofill
-sorttable
+add negative search terms
 csv dump
 app opens webpage
-public on ec2?
+url to running program
+write backup
 dump and load backup
-reactivate columns
-xfer to windows
+fix windows setup
+    read TODO in setup.py
     on janus server
     shut down apache
     shut down webroot
     open git bash (cd subi)
     open cmd (cd subi)
     open passwords.kdb
+    open subi folder
+installation instructions
+make sure we are actually offline (deny if not from localhost)
+add minus operator to search
