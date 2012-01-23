@@ -21,7 +21,6 @@ from urlparse import urlparse, parse_qs
 from scripts import subi_db
 import json
 import shlex          # "'a very' nice boy" -> ['a very', nice, boy]
-import json
 import webbrowser
 import codecs
 import traceback
@@ -312,7 +311,7 @@ class MyHandler(BaseHTTPRequestHandler):
         # Tell them we have a good response with json
         # safari coughs if this is not here
         self.send_response(200)
-        self.send_header('Content-type', 'text/json')
+        self.send_header('Content-type', 'application/json')
         self.end_headers()
 
         # Send back some json
@@ -353,7 +352,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
         json_response = json.dumps(response)
         self.send_response(200)
-        self.send_header('Content-type', 'text/json')
+        self.send_header('Content-type', 'application/json')
         self.end_headers()
         self.wfile.write(json_response)
         return
