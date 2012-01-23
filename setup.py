@@ -48,16 +48,22 @@ elif sys.platform == 'win32':
         data_files=[
             ('web', 
                 [
+                    r'web\\bootstrap.min.css',
+                    r'web\\jquery-ui-1.8.css',
                     r'web\\404.html',
-                    r'web\\favicon.ico',
                     r'web\\subi.html',
                     r'web\\upload.html',
+                    r'web\\favicon.ico',
+                    r'web\\jquery-1.7.1.min.js',
+                    r'web\\jquery.form.js',
+                    r'web\\jquery.jeditable.mini.js',
+                    r'web\\jquery-ui-1.8.16.min.js'
                 ]
             ),
-            ('web\\css\\bootstrap', 
+            ('data', 
                 [
-                    r'web\\css\\bootstrap\\bootstrap.min.css',
-                    r'web\\css\\bootstrap\\bootstrap.css'
+                    r'data\\subi.db',
+                    r'data\\subi_backup_example',
                 ]
             )
         ],
