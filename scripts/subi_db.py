@@ -7,6 +7,7 @@ import sys
 import os
 import time
 import string
+import codecs
 
 class subi_db_class:
     connection = None
@@ -516,9 +517,12 @@ class subi_db_class:
                         time.asctime().replace(' ', '_')
                         )
         filepath = os.path.join(self.data_dir, filename)
-        with open(filepath, 'w') as f:
-            for line in connection.iterdump():
-                f.write('%s\n' % line)
+
+        # use utf-8 to support unicode
+        f = codecs.open(filepath, encoding='utf-8', mode='w')
+        for line in connection.iterdump():
+            f.write('%s\n' % line)
+        f.close()
 
         return filename
 
@@ -556,7 +560,7 @@ class subi_db_class:
         # that way an error will get thrown before any deleting happens if
         # it cannot be found.
         filepath = os.path.join(self.data_dir, filename)
-        backup = open(filepath)
+        backup = codecs.open(filepath, encoding='utf-8', mode='r')
 
         # make a new backup file just in case
         backup_filename = self.backup_db()

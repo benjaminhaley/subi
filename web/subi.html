@@ -7,6 +7,7 @@
     <script src="jquery-1.7.1.min.js"></script>
     <script src="jquery-ui-1.8.16.min.js"></script>
     <script src="jquery.jeditable.mini.js"></script>
+    <script src="jquery.form.js"></script>
 
 
     <!-- Le styles -->
@@ -56,11 +57,26 @@
         display: none;
         position: fixed;
         width:100%;
+        z-index:10000;
+      }
+
+      /* Notification backgrounds should match the notice */
+      /* Could use some tweaking */
+      input.notify-background {
+          background-color: #F1E6AC;
       }
 
       /* My buttons need a little buffer */
-      .create {
-          margin: 9px;
+      .command {
+          margin-bottom: 18px;
+      }
+
+      /* The search box should be large and stay on top */
+      .xlarge {
+          height: 28px;
+      }
+      .add-on {
+          height: 35px;
       }
 
     </style>
@@ -69,27 +85,91 @@
 
   <body>
 
+  <!-- Invisible fields for data storage -->
+  <span id="col_info"></span>
+  <span id="loaded_animal"></span>
 
-    <h4><div class="notify alert-message"></div></h4>
-    <div class="topbar">
-      <div class="fill">
-        <div class="container">
-          <a class="brand" href="subi">subi</a>
-          <ul class="nav">
-            <li class="active"><a href="">Home</a></li>
-            <li><a href="#about">About</a></li>
-          </ul>
+  <!-- A place to notify users of special events -->
+  <h4><div class="notify alert-message"></div></h4>
+
+  <!-- Top nagivigation bar -->
+  <div class="topbar">
+    <div class="fill">
+      <div class="container">
+        <a class="brand" href="subi">subi</a>
+        <ul class="nav">
+          <li class="active"><a href="">Home</a></li>
+          <li><a href="http://janus.northwestern.edu/subi">About</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="content">
+      <div class="page-header search">
+        <!-- Search form -->
+        <p>
+          <form id="search_form" class="" action="">
+            <div class="input-prepend">
+              <span class="add-on">search</span>
+              <input class="xlarge span15" id="search" type="text">
+              </input>
+            </div>
+          </form>
+        </p>
+        <p>
+          <div id="search_status" class="span5"></div>
+        </p>
+
+      </div>
+      <div class="row">
+        <div class="span13" style="height: 500px">
+
+        <!-- A place to diplay our animal -->
+        <table class="span13" id="animal">
+            <tbody class="span13 well">
+            </tbody>
+        </table>
+
+        </div>
+        <div class="span3" id="animal_commands" >
+        </div>
+        <hr/>
+        <div class="span3" id="db_commands" >
         </div>
       </div>
     </div>
 
-    <div class="container">
-      <div class="content">
-        <div class="page-header">
-          <h1>SUBI <small> radiobiology archive</small></h1>
-        </div>
-        <div class="row">
-          <div class="span10">
+    <footer class=''>
+      <p>
+        Built by
+        <a href='http://janus.northwestern.edu/wololab/index.php?go=bioBen'>Ben Haley</a> 
+        and 
+        <a href='http://janus.northwestern.edu/wololab/index.php?go=bioDave'>Dave Paunesku</a> 
+        using 
+        <a href='http://python.org/'>python</a>, 
+        <a href='http://www.sqlite.org/'>sqllite</a>, 
+        <a href='http://twitter.github.com/bootstrap/'>bootstrap</a>, 
+        <a href='http://jquery.com/'>jquery</a>,
+        <a href='http://jquery.malsup.com/form/'>the jquery form plugin</a>,
+        and, 
+        <a href='http://www.appelsiini.net/projects/jeditable'>jeditable</a>
+        as a gift to the radiobiology researchers at The Southern Urals 
+        Biophysics Institute courtesy of the 
+        <a href='http://janus.northwestern.edu/wololab/'>Woloschak Laboratory</a>
+        and the 
+        <a href='http://energy.gov/'>U.S. Department of Energy</a>
+      </p>
+      <p>
+        For questions contact
+        benjamin.haley@gmail.com
+      </p>
+
+    </footer>
+
+  </div> <!-- /container -->
+
 
 <script language="javascript" type="text/javascript">
     $(function(){
@@ -272,7 +352,7 @@
                     // be sure to update the page if the animal id 
                     // was changed
                     // this is pretty hacky stuff.  In reality we should
-                    // not tie the permanant animal identifier that we use
+                    // not tie the permanent animal identifier that we use
                     // to the one the user uses
                     if (url.indexOf('col_name=animal_id') !== -1){
                         var new_animal_id = url.substring(url.indexOf('col_value=') + 'col_value='.length);
@@ -322,7 +402,6 @@
         // for now we only support varchar
         function bind_create_col(create_col_id)
         {
-            // Give them the right to execute
             $("#" + create_col_id).click(function(){
 
                 // fetch column to create
@@ -416,8 +495,8 @@
                 "<a " +
                 "href='javascript:void(0)'" +  // make it appear clickable 
                 "id='" + create_col_id + "'" + 
-                "class='small close'" +        // look like a close
-                ">+</a>";
+                "class=''" +        // look like a close
+                ">+ add field to all animals</a>";
 
             return(link);
         }
@@ -459,9 +538,9 @@
 
             $("#animal").find('tbody').append(
                     "<tr>" + 
-                    "<td>" + delete_col_link + "</td>" +
-                    "<td id='" + col_id + "'>" + col_description + "</td>" +
-                    "<td>" + get_animal_textarea(value, id) + "</td>" +
+                    "<td class='span1'>" + delete_col_link + "</td>" +
+                    "<td class='span7' id='" + col_id + "'>" + col_description + "</td>" +
+                    "<td class='span8'>" + get_animal_textarea(value, id) + "</td>" +
                     "</tr>"
                     );
 
@@ -525,7 +604,7 @@
             $("#animal").find('tbody').html("");
 
             // Write in new animal
-            // Iterate over col_info (as oposed to animal)
+            // Iterate over col_info (as opposed to animal)
             // to get the order right
             for (col in col_info)
             {
@@ -541,16 +620,14 @@
             var create_col_id = 'create_column_' + new_col_name;
             $("#animal").find('tbody').append(
                     "<tr>" + 
-                        "<td id='" + create_col_id + "'>" + create_col_link + "</td>" +
                         "<td>" + "</td>" +
+                        "<td id='" + create_col_id + "'>" + create_col_link + "</td>" +
                         "<td>" + "</td>" +
                     "</tr>"
             );
 
             // Bind the controller
-            $("#" + create_col_id).click(function(){
-                bind_create_col($(this).attr('id'))
-            });
+            bind_create_col(create_col_id)
 
         }
 
@@ -607,7 +684,7 @@
                 // Always show count
                 search_status_html += " . Animal " + result_number + " of " + count + " . ";
 
-                // Show next button if applicaable
+                // Show next button if applicable
                 if (result_number < count){
                     search_status_html += 
                         "<a " + 
@@ -777,9 +854,26 @@
             });
         }
 
+        // Give the user the tools to backup and restore the db
+        function write_db_commands()
+        {
+            // Some ids for dom manipulation
+            var backup_db_id = 'backup_db';
+            var replace_db_id = 'replace_db';
+
+            // Give us buttons to control with
+            var html = get_backup_db_link(backup_db_id) + 
+                       get_replace_db_link(replace_db_id);
+            $("#db_commands").html(html);
+
+            // Bind controllers
+            bind_backup_db(backup_db_id);
+            bind_replace_db(replace_db_id);
+        }
+
         // Give the user the tools to make new animals
         // copy animals or delete animals.
-        function write_create()
+        function write_animal_commands()
         {
             // Always allow us to create a new animal
             var new_animal_id = get_rand_name();
@@ -805,7 +899,7 @@
             // Finally write and bind the elements
 
             // write the buttons
-            $("#commands").html(html);
+            $("#animal_commands").html(html);
             bind_insert_animal(insert_animal_id);
 
             if (typeof animal !== "undefined"){
@@ -813,6 +907,124 @@
                 bind_delete_animal(delete_animal_id);
             }
         }
+
+        // User should be able to download a backup
+        function bind_backup_db(backup_db_id)
+        {
+            $("#" + backup_db_id).click(function(){
+                backup_db(function(filename){
+
+                    // Download the backup
+                    url = 
+                        "subi/data?" + 
+                        "filename=" + filename;
+
+                    // Download url
+                    location.href=url;
+ 
+                });
+            });
+        }
+
+        // Function to download backup
+        // callback will run on the filename
+        function backup_db(callback) 
+        {
+            // compose backup ajax call
+            url = 
+                "subi/ajax?" + 
+                "command=backup_db";
+
+            // make backup before calling to download it
+            $.getJSON(url, function(response) {
+
+                var is_error = check_error(response);
+
+                if (is_error) {
+                    handle_error(response['error']);
+                } else {
+                    filename = response['data'];
+
+                    // callback if possible
+                    if(typeof callback === 'function'){
+                        callback(filename);
+                    }
+               }
+            });
+        }
+
+        // We want to make it hard to accidentally overwrite
+        // the database
+        // so we will ask for confirmation and make a safety
+        // backup for them.  They can't access the safety, but 
+        // I could
+        function bind_replace_db(replace_db_id)
+        {
+            $("#" + replace_db_id).click(function(){
+
+                // first backup the current db
+                backup_db();
+
+                var upload_id = 'upload_id';
+
+                // Write an upload form
+                var upload_form = 
+                    "<form " +
+                    "action='subi' " + 
+                    "method='post' " +
+                    "enctype='multipart/form-data' " +
+                    "id=" + upload_id +
+                    "> " +
+                    "<input class='notify-background' type='file' name='filename' />" +
+                    "<br/>" +
+                    "<input class='btn danger close_notify' type='submit' value='Upload' />" +
+                    " or <a href='javascript:void(0)' " + 
+                    "class='btn close_notify'" + ">" +
+                    "Cancel" + "</a>" +
+                    "</form>";
+                // Give the user a second chance
+                var confirmation_msg =
+                "Select a backup file to permanently replace the existing data." +
+                    "<br/><br/><p>" +
+                    upload_form +
+                    "</p>";
+
+                notify(confirmation_msg);
+
+                // Give them the right to execute
+                $("#" + upload_id).ajaxForm(function(response){
+
+                    // Convert the response to json
+
+                    var is_error = check_error(response);
+
+                    if (is_error) {
+                        handle_error(response['error']);
+                    } else {
+                        // Now we need to instantiate the uploaded db
+                        filename = response['data'];
+                        url = 
+                            'subi/ajax?' +
+                            'command=load_db&' +
+                            'filename=' + filename;
+
+                        // engage
+                        $.getJSON(url, function(response) {
+
+                            var is_error = check_error(response);
+
+                            if (is_error) {
+                                handle_error(response['error']);
+                            } else {
+                                // reload the page to see the new db
+                                load_page();
+                            }
+                        });
+                    }
+                });
+            });
+        }
+
 
         // User should be able to start a new animal
         function bind_insert_animal(insert_animal_id)
@@ -899,7 +1111,7 @@
 
                 // Give the user a second chance
                 confirmation_msg = 
-                    "Are you sure you want to permanantly delete this animal? " + 
+                    "Are you sure you want to permanently delete this animal? " + 
                     "<br/><a href='javascript:void(0)' " + 
                     "id=" + delete_confirmation_id + " " +
                     "class='btn danger close_notify'" + ">" +
@@ -942,12 +1154,35 @@
             });
         }
 
+        function get_backup_db_link(backup_db_id)
+        {
+            link = "<a " +
+                "href='javascript:void(0)' " +  // make it appear clickable 
+                "id='" + backup_db_id + "' " + 
+                "class='btn command' " +        // look like a close
+                "title='Save a copy of the current database to a backup file' " +
+                ">Download backup database</a>";
+            return(link);
+        }
+
+        function get_replace_db_link(replace_db_id)
+        {
+            link = "<a " +
+                "href='javascript:void(0)' " +  // make it appear clickable 
+                "id='" + replace_db_id + "' " + 
+                "class='btn command' " +        // look like a close
+                "title='Upload a new database to replace the one in use' " +
+                ">Replace current database</a>";
+            return(link);
+        }
+
+
         function get_insert_animal_link(insert_animal_id)
         {
             link = "<a " +
                 "href='javascript:void(0)' " +  // make it appear clickable 
                 "id='" + insert_animal_id + "' " + 
-                "class='btn create primary' " +        // look like a close
+                "class='btn command primary' " +        // look like a close
                 ">Create new animal</a>";
             return(link);
         }
@@ -957,7 +1192,7 @@
             link = "<a " +
                 "href='javascript:void(0)' " +  // make it appear clickable 
                 "id='" + copy_animal_id + "' " + 
-                "class='btn create' " +        // look like a close
+                "class='btn command' " +        // look like a close
                 ">Copy this animal</a>";
             return(link);
         }
@@ -967,7 +1202,7 @@
             link = "<a " +
                 "href='javascript:void(0)' " +  // make it appear clickable 
                 "id='" + delete_animal_id + "' " + 
-                "class='btn danger create' " +         // think twice
+                "class='btn command' " +         // think twice
                 ">Delete this animal</a>";
             return(link);
         }
@@ -984,8 +1219,9 @@
             // Focus on search bar
             $("#search").select();
 
-            // Give tools for creation
-            write_create();
+            // Give tools for animal and database manipulation
+            write_animal_commands();
+            write_db_commands();
         }
 
         // Handle a page load
@@ -1005,7 +1241,7 @@
         // Make sure we refresh creation tools when animals are loaded
         $("#loaded_animal").bind('changeData', function(){
             var animal = $("#loaded_animal").data('loaded_animal');
-            write_create();
+            write_animal_commands();
         });
 
         load_page();
@@ -1013,62 +1249,5 @@
    });
 
 </script>
-
-          <!-- Invisible fields for data storage -->
-          <span id="col_info"></span>
-          <span id="loaded_animal"></span>
-
-          <!-- Search form -->
-          <form id="search_form" class="form-stacked" action="">
-            <fieldset>
-              <div class="clearfix">
-                <div class="input">
-                  <input class="xlarge span9" id="search" type="text" placeholder="search"/>
-                </div>
-              </div><!-- /clearfix -->
-            </fieldset>
-          </form>
-
-          <div class="row">
-              <p id="search_status" class="span5"></p>
-          </div>
-          <table class="span10" id="animal">
-              <tbody>
-              </tbody>
-          </table>
-
-          </div>
-          <div class="span3" id="commands" >
-          </div>
-        </div>
-      </div>
-
-      <footer class=''>
-            <p>
-            Built by 
-            <a href='http://janus.northwestern.edu/wololab/index.php?go=bioBen'>Ben Haley</a> 
-            and 
-            <a href='http://janus.northwestern.edu/wololab/index.php?go=bioDave'>Dave Paunesku</a> 
-            using 
-            <a href='http://python.org/'>python</a>, 
-            <a href='http://www.sqlite.org/'>sqllite</a>, 
-            <a href='http://twitter.github.com/bootstrap/'>bootstrap</a>, 
-            <a href='http://jquery.com/'>jquery</a>, and 
-            <a href='http://www.appelsiini.net/projects/jeditable'>jeditable</a>
-            as a gift to the radiobiology researchers at The Southern Urals 
-            Biophysics Institute courtesy of the 
-            <a href='http://janus.northwestern.edu/wololab/'>Woloschak Laboratory</a>
-            and the 
-            <a href='http://energy.gov/'>U.S. Department of Energy</a>
-            </p>
-            <p>
-              For questions contact
-              benjamin.haley@gmail.com
-            </p>
- 
-      </footer>
-
-    </div> <!-- /container -->
-
   </body>
 </html>

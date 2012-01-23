@@ -22,6 +22,9 @@ from scripts import subi_db
 import json
 import shlex          # "'a very' nice boy" -> ['a very', nice, boy]
 import json
+import webbrowser
+import codecs
+import traceback
 
 webdir = 'web'
 home_url = 'http://localhost/subi'
@@ -29,7 +32,29 @@ home_url = 'http://localhost/subi'
 
 class MyHandler(BaseHTTPRequestHandler):
 
+    def __authorize(self):
+        """ Before anything else, always check that they are
+            an authorized client.
+        """
+        authorized_clients = \
+            [
+                '127.0.0.1',     # localhost
+                '127.0.0.1/8',   # localhost alias
+                '127.0.0.1/8',   # localhost alias
+                '::1',           # localhost in ipv6
+                '::1/128'        # localhost alias in ipv6
+            ]
+
+        client = self.client_address[0]
+
+        if not client in authorized_clients:
+            raise Exception("Client is not authorized!")
+
     def do_GET(self):
+
+        # Security first
+        self.__authorize()
+
         print ""
         print("Requested " + self.path)
         req = urlparse(self.path)
@@ -39,6 +64,7 @@ class MyHandler(BaseHTTPRequestHandler):
                     "/jquery-1.7.1.min.js",
                     "/jquery-ui-1.8.16.min.js",
                     "/jquery.jeditable.mini.js",
+                    "/jquery.form.js",
                     "/jquery-ui-1.8.css",
                     "/bootstrap.min.css",
                     "/favicon.ico"]:
@@ -80,7 +106,7 @@ class MyHandler(BaseHTTPRequestHandler):
                     self.send_header(
                         'Content-disposition',
                         'attachment; filename=%s' % q['filename'][0])
-                    self.send_header('Content-type', 'application/sdb')
+                    self.send_header('Content-type', 'application/octet-stream')
                     self.end_headers()
                     self.wfile.write(f.read())
                     f.close()
@@ -116,6 +142,11 @@ class MyHandler(BaseHTTPRequestHandler):
             It will handle any ajax query with a json response.
             Errors will be noted in json.
         """
+
+        # Security first
+        # (though this should have been handled in get or post)
+        self.__authorize()
+
         req = urlparse(self.path)
         q = parse_qs(req.query)
 
@@ -156,6 +187,8 @@ class MyHandler(BaseHTTPRequestHandler):
                 )
 
             elif command == "update_col":
+                if 'field_value' not in q:
+                    q['field_value'] = [None]
                 db.update_col(
                     q['col_name'][0],
                     q['field_name'][0],
@@ -249,6 +282,7 @@ class MyHandler(BaseHTTPRequestHandler):
                 response['data'] = data
 
             elif command == "load_db":
+                print q
                 data = db.load_db(q['filename'][0])
                 response['data'] = data
 
@@ -270,26 +304,16 @@ class MyHandler(BaseHTTPRequestHandler):
 
         except Exception as e:
 #           raise
-            import traceback
             # add call and traceback info to error message so I can debug
             msg = "Requested " + self.path + "\n"
             msg += traceback.format_exc()
             response = {'ok': False, 'error': msg}
 
-#        print("Animals table: ")
-#        rows = db.run_sql_query("SELECT * FROM animals")
-#        if len(rows) > 0:
-#            print("    " + str(rows[0].keys()))
-#        for row in rows:
-#            print "    ",
-#            print row
-#        print("Column definitions ")
-#        rows = db.run_sql_query("SELECT * FROM col_definitions")
-#        if len(rows) > 0:
-#            print("    " + str(rows[0].keys()))
-#        for row in rows:
-#            print "    ",
-#            print row
+        # Tell them we have a good response with json
+        # safari coughs if this is not here
+        self.send_response(200)
+        self.send_header('Content-type', 'text/json')
+        self.end_headers()
 
         # Send back some json
         json_response = json.dumps(response)
@@ -299,28 +323,55 @@ class MyHandler(BaseHTTPRequestHandler):
         # db.create_col(col_name, col_type, col_desc, col_group)
 
     def do_POST(self):
+
+        # Security first
+        self.__authorize()
+
         global rootnode
         try:
+            # Get the file from the post
             ctype, pdict = cgi.parse_header(self.headers.getheader('content-type'))
             if ctype == 'multipart/form-data':
                 query = cgi.parse_multipart(self.rfile, pdict)
-            self.send_response(301)
+            upfilecontent = query.get('filename')
 
-            self.end_headers()
-            upfilecontent = query.get('upfile')
-            print "filecontent", upfilecontent[0]
-            self.wfile.write("<HTML>POST OK.<BR><BR>")
-            self.wfile.write(upfilecontent[0])
+            # For now we just save it to the data dir
+            filename = 'subi_backup_uploaded'
+            filepath = path.join('data', filename)
+            f = open(filepath, 'w')
+            f.write(upfilecontent[0])
+            f.close()
 
-        except:
-            pass
+            # Send the filename back
+            response = {'ok': True, 'data': filename}
+
+        except Exception as e:
+            # add call and traceback info to error message so I can debug
+            msg = "Requested " + self.path + "\n"
+            msg += traceback.format_exc()
+            response = {'ok': False, 'error': msg}
+
+        json_response = json.dumps(response)
+        self.send_response(200)
+        self.send_header('Content-type', 'text/json')
+        self.end_headers()
+        self.wfile.write(json_response)
+        return
 
 
 def main():
     try:
+        # Start the server
         server = HTTPServer(('', 80), MyHandler)
         print 'started httpserver...'
+
+        # Open the subi webpage
+        url = 'http://localhost/subi'
+        webbrowser.open_new(url)
+
+        # Don't stop serving
         server.serve_forever()
+
     except KeyboardInterrupt:
         print '^C received, shutting down server'
         server.socket.close()

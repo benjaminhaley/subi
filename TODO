@@ -45,6 +45,7 @@ make web interface
     Download backup
         get an appropriate filename from list backups
         http://localhost/subi/data?filename=subi_backup_1326735438.12_Mon_Jan_16_11:37:18_2012
+        http://localhost/subi/data?filename=subi_backup_big_test
     Upload backup (may need post)
         should post to urls
         (might have to get valid filename from list backups)
@@ -54,6 +55,30 @@ make web interface
         http://localhost/subi/ajax?command=load_db&filename=subi_backup_big_test
         http://localhost/subi/ajax?command=load_db&filename=subi_backup_fresh_start
 
+Now
+    check in other browsers
+    url to running program
+        add about page
+        fix windows setup
+            read TODO in setup.py
+            on janus server
+            shut down apache
+            shut down webroot
+            open git bash (cd subi)
+            open cmd (cd subi)
+            open passwords.kdb
+            open subi folder
+        installation instructions
+    add sample entry
+       /sample/*.JPG
+
+
+
+soon
+    move commands (above) to readme
+    add minus operator to search
+    csv dump
+
 Later
     jslint
     refactor
@@ -61,24 +86,3 @@ Later
     Record command / response history ... offer to email it to me if we raise an
     translation
     add password protections to manipulate data
-
-add sample entry
-   /sample/*.JPG
-add negative search terms
-csv dump
-app opens webpage
-url to running program
-write backup
-dump and load backup
-fix windows setup
-    read TODO in setup.py
-    on janus server
-    shut down apache
-    shut down webroot
-    open git bash (cd subi)
-    open cmd (cd subi)
-    open passwords.kdb
-    open subi folder
-installation instructions
-make sure we are actually offline (deny if not from localhost)
-add minus operator to search
