@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import sqlite3 as lite
+from sqlite3 import dump    # Need to be explicit for py2exe to work
 import sys
 import os
 import time
@@ -509,12 +510,11 @@ class subi_db_class:
         connection = self.connection
         dump = ''
 
-        # sortable, non conflicting, and human readable
-        # e.g. 'subi_dump_1326494589.03 Fri_Jan_13_16:43:09_2012'
-        filename = '%s_%s_%s' % (
+        # sortable, non conflicting, and timely
+        # e.g. 'subi_dump_1326494589.03'
+        filename = '%s_%s' % (
                         self.backup_prefix,
-                        str(time.time()),
-                        time.asctime().replace(' ', '_')
+                        str(time.time())
                         )
         filepath = os.path.join(self.data_dir, filename)
 

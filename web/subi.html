@@ -98,7 +98,7 @@
       <div class="container">
         <a class="brand" href="subi">subi</a>
         <ul class="nav">
-          <li class="active"><a href="">Home</a></li>
+          <li class="active"><a href="subi">Home</a></li>
           <li><a href="http://janus.northwestern.edu/subi">About</a></li>
         </ul>
       </div>
@@ -121,21 +121,20 @@
         <p>
           <div id="search_status" class="span5"></div>
         </p>
-
       </div>
+      
       <div class="row">
         <div class="span13" style="height: 500px">
 
-        <!-- A place to diplay our animal -->
-        <table class="span13" id="animal">
-            <tbody class="span13 well">
-            </tbody>
-        </table>
-
+          <!-- A place to diplay our animal -->
+          <table class="span13" id="animal">
+              <tbody class="span13 well">
+              </tbody>
+          </table>
         </div>
-        <div class="span3" id="animal_commands" >
+        
+        <div class="span3" id="animal_commands">
         </div>
-        <hr/>
         <div class="span3" id="db_commands" >
         </div>
       </div>
@@ -159,7 +158,9 @@
         Biophysics Institute courtesy of the 
         <a href='http://janus.northwestern.edu/wololab/'>Woloschak Laboratory</a>
         and the 
-        <a href='http://energy.gov/'>U.S. Department of Energy</a>
+        <a href='http://energy.gov/'>U.S. Department of Energy</a>.
+        Source code is available from 
+        <a href='https://github.com/benjaminhaley/subi'>github</a>.
       </p>
       <p>
         For questions contact
@@ -332,7 +333,7 @@
             var animal = $("#loaded_animal").data('loaded_animal');
             var animal_id = animal['animal_id'];
             var column = $("#" + id).attr('id').substring('animal_text_area_'.length);
-            var value = $("#" + id).attr('value').trim();
+            var value = $.trim($("#" + id).attr('value'));   // trim has to be outside for ie support
 
             // Construct a request url
             var url = 'subi/ajax?' + 
@@ -991,11 +992,13 @@
                     "</p>";
 
                 notify(confirmation_msg);
+                console.log(upload_id);
 
                 // Give them the right to execute
                 $("#" + upload_id).ajaxForm(function(response){
 
                     // Convert the response to json
+                    response = $.parseJSON(response)
 
                     var is_error = check_error(response);
 
@@ -1173,7 +1176,7 @@
                 "id='" + replace_db_id + "' " + 
                 "class='btn command' " +        // look like a close
                 "title='Upload a new database to replace the one in use' " +
-                ">Replace current database</a>";
+                ">Replace current database (only works in google chrome)</a>";
             return(link);
         }
 
@@ -1211,6 +1214,14 @@
 
         function load_page()
         {
+            // Tell i.e. we can't help them
+            try{ ''.trim() }
+            catch(err){ notify(
+                "subi does not support Internet Explorer yet.  " +
+                "Please open http://localhost/subi in " +
+                "chrome or firefox."
+            ); }
+        
             // Search for terms
             var offset = read_url('offset', 0);
             var search_terms = read_url('search_terms', '');
