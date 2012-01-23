@@ -481,9 +481,10 @@
         function get_delete_col_link(delete_col_id)
         {
             link = "<a " +
-                "href='javascript:void(0)'" +  // make it appear clickable 
-                "id='" + delete_col_id + "'" + 
-                "class='small close'" +        // look like a close
+                "href='javascript:void(0)' " +  // make it appear clickable 
+                "id='" + delete_col_id + "' " + 
+                "class='small close' " +        // look like a close
+                "tabindex='-1' " +                // allow tab to jump straight to inputs
                 ">x</a>";
 
             return(link);
@@ -1242,6 +1243,14 @@
         $("#loaded_animal").bind('changeData', function(){
             var animal = $("#loaded_animal").data('loaded_animal');
             write_animal_commands();
+        });
+
+        // To support back and forward buttons
+        // we need to detect hash changes.
+        // this might not work in some older or
+        // mobile browsers, but its just a nicety anyways
+        $(window).bind('hashchange', function(){
+            load_page();
         });
 
         load_page();
