@@ -56,8 +56,8 @@ make web interface
         http://localhost/subi/ajax?command=load_db&filename=subi_backup_fresh_start
 
 Now
-    check in other browsers
     url to running program
+        url is janus.northwestern.edu/subi
         add about page
         fix windows setup
             read TODO in setup.py
@@ -71,6 +71,7 @@ Now
         installation instructions
     add sample entry
        /sample/*.JPG
+    check in other browsers
 
 
 
