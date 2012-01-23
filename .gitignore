@@ -8,7 +8,7 @@ build/
 *.pyc
 
 # No data in the repo
-data/
+# see data/.gitignore
 
 # Ignore helper files
 .DS_store
