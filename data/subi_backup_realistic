@@ -1,0 +1,20 @@
+BEGIN TRANSACTION;
+CREATE TABLE col_definitions
+                          (col_name varchar(12) unique,
+                           col_description varchar(12),
+                           col_type varchar(12),
+                           col_order integer primary key,
+                           col_group varchar(12),
+                           active bool);
+INSERT INTO "col_definitions" VALUES('animal_id','Animal ID','DECIMAL(10,10)',1,'',1);
+INSERT INTO "col_definitions" VALUES('gdgjgegaiiig','Animal''s identification number','VARCHAR(120)',2,NULL,1);
+INSERT INTO "col_definitions" VALUES('bfiihgebghed','Place of biomaterial storage','VARCHAR(120)',3,NULL,1);
+INSERT INTO "col_definitions" VALUES('geebifjehbfh','Southern Urals Biophysics Institute FMBA','VARCHAR(120)',4,NULL,1);
+INSERT INTO "col_definitions" VALUES('ghahagaicjba','Building No','VARCHAR(120)',5,NULL,1);
+INSERT INTO "col_definitions" VALUES('fibhdgdgdehf','Room No','VARCHAR(120)',6,NULL,1);
+CREATE TABLE animals
+                            (animal_id DECIMAL(10,10), gdgjgegaiiig VARCHAR(120), bfiihgebghed VARCHAR(120), geebifjehbfh VARCHAR(120), ghahagaicjba VARCHAR(120), fibhdgdgdehf VARCHAR(120));
+INSERT INTO "animals" VALUES('hgdbcdffafig','2169',NULL,'SUBI','3','221');
+INSERT INTO "animals" VALUES('ajjjfbfajdhc','2168',NULL,'SUBI','3','220');
+INSERT INTO "animals" VALUES('ahbdgbfjfibg','2167','Я хочу изучать русский','SUBI','3','220');
+COMMIT;

@@ -3,3 +3,8 @@
 
 # Except of course this .gitignore file
 !.gitignore
+
+# And except some sample data
+!subi_backup_big_test
+!subi_backup_realistic
+

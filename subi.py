@@ -23,7 +23,6 @@ import json
 import webbrowser
 import codecs
 import traceback
-import csv
 
 webdir = 'web'
 home_url = 'http://localhost/subi'
@@ -144,7 +143,7 @@ class MyHandler(BaseHTTPRequestHandler):
                 for animal in result['animals']:
                     row = ''
                     for name in col_names:
-                        value = str(animal[name])
+                        value = unicode(animal[name])
 
                         # remove csv dangerous chars
                         value = value.replace(';', '')
@@ -164,7 +163,7 @@ class MyHandler(BaseHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header(
                     'Content-disposition',
-                    'attachment; filename=subi results.csv')
+                    'attachment; filename=subi_results.csv')
                     # mustn't include unicode above due to
                     # http://tinyurl.com/62fb7h6
 
@@ -175,6 +174,34 @@ class MyHandler(BaseHTTPRequestHandler):
 
                 # delete the file for good
                 unlink('temp.csv')
+
+                return
+
+            # Give a backup
+            elif req.path == "/subi/backup":
+
+                # make a new backup
+                db = subi_db.subi_db_class()
+                filename = db.backup_db()
+
+                # open the backup file
+                filepath = path.join('data', filename)
+
+                # Open the db for reading
+                f = open(filepath, 'r')
+
+                # Send the file as a response
+                self.send_response(200)
+                self.send_header(
+                    'Content-disposition',
+                    'attachment; filename=%s' % filename)
+                    # mustn't include unicode above due to
+                    # http://tinyurl.com/62fb7h6
+
+                self.send_header('Content-type', 'application/octet-stream')
+                self.end_headers()
+                self.wfile.write(f.read())
+                f.close()
 
                 return
 
@@ -215,11 +242,19 @@ class MyHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 return
 
+            # Determine the content type
+            if fpath.endswith(".css"):
+                content_type = 'text/css'
+            elif fpath.endswith(".js"):
+                content_type = 'application/javascript'
+            else:
+                content_type = 'text/html'
+
             # by default we return the corresponding .html file
             # in the web directory
             f = open(webdir + fpath)
             self.send_response(200)
-            self.send_header('Content-type', 'text/html')
+            self.send_header('Content-type', content_type)
             self.end_headers()
             self.wfile.write(f.read())
             f.close()
