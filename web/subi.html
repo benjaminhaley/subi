@@ -676,7 +676,6 @@ $(function () {
 
     // Search for animals
     function search(search_terms) {
-        console.trace();
         // Some variables
         var offset;
 
@@ -1230,7 +1229,7 @@ $(function () {
             // Write an upload form
             upload_form =
                 "<form " +
-                "action='subi' " +
+                "action='subi/ajax?command=upload' " +
                 "method='post' " +
                 "enctype='multipart/form-data' " +
                 "id=" + upload_id +
@@ -1254,37 +1253,11 @@ $(function () {
             // Give them the right to execute
             $("#" + upload_id).ajaxForm(function (response) {
                 // Some variables
-                var is_error, filename, url;
-
-                is_error = check_error(response);
-
-                if (is_error) {
-                    handle_error(response.error);
-                } else {
-                    // Now we need to instantiate the uploaded db
-                    filename = response.data;
-                    url =
-                        'subi/ajax?' +
-                        'command=load_db&' +
-                        'filename=' + filename;
-
-                    // engage
-                    $.getJSON(url, function (response) {
-                        // Some variables
-                        var is_error;
-
-                        is_error = check_error(response);
-
-                        if (is_error) {
-                            handle_error(response.error);
-                        } else {
-                            // reload the page to see the new db
-                            clear_url();
-                            load_page();
-                            notify("New database loaded");
-                        }
-                    });
-                }
+                // Firefox likes to download our response here
+                // so we won't send one
+                clear_url();
+                load_page();
+                notify("New database loaded");
             });
         });
     }

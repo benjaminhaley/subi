@@ -425,10 +425,6 @@ class MyHandler(BaseHTTPRequestHandler):
                 data = db.backup_db()
                 response['data'] = data
 
-            elif command == "load_db":
-                data = db.load_db(q['filename'][0])
-                response['data'] = data
-
             elif command == "delete_backup":
                 db.delete_backup(q['filename'][0])
 
@@ -469,6 +465,9 @@ class MyHandler(BaseHTTPRequestHandler):
 
         # Security first
         self.__authorize()
+        
+        # Open a connection to the
+        db = subi_db.subi_db_class()
 
         global rootnode
         try:
@@ -478,15 +477,18 @@ class MyHandler(BaseHTTPRequestHandler):
                 query = cgi.parse_multipart(self.rfile, pdict)
             upfilecontent = query.get('filename')
 
-            # For now we just save it to the data dir
+            # First save it to the data dir
             filename = 'subi_backup_uploaded'
             filepath = path.join('data', filename)
             f = open(filepath, 'w')
             f.write(upfilecontent[0])
             f.close()
+            
+            # then instantiate it
+            db.load_db(filename)
 
             # Send the filename back
-            response = {'ok': True, 'data': filename}
+            response = {'ok': True}
 
         except Exception as e:
             # add call and traceback info to error message so I can debug
@@ -496,9 +498,9 @@ class MyHandler(BaseHTTPRequestHandler):
 
         json_response = json.dumps(response)
         self.send_response(200)
-        self.send_header('Content-type', 'application/json')
+        #self.send_header('Content-type', 'application/json')
         self.end_headers()
-        self.wfile.write(json_response)
+        #self.wfile.write(json_response)
         return
 
 

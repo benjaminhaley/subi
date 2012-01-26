@@ -554,6 +554,7 @@ class subi_db_class:
         db_list = self.list_backups()
         db_filenames = [db['filename'] for db in db_list]
         is_valid_backup_name = (filename in db_filenames)
+
         if not is_valid_backup_name:
             raise Exception("Database filename could not be found")
 
