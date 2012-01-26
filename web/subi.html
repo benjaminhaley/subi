@@ -9,7 +9,6 @@
     <script src="jquery.jeditable.mini.js"></script>
     <script src="jquery.form.js"></script>
 
-
     <!-- Le styles -->
     <link href="jquery-ui-1.8.css" rel="stylesheet"/>
     <link href="bootstrap.min.css" rel="stylesheet"/>
@@ -113,18 +112,19 @@
           <form id="search_form" class="" action="">
             <div class="input-prepend">
               <span class="add-on">search</span>
-              <input class="xlarge span15" id="search" type="text">
+              <input class="xlarge span15" id="search" type="text" placeholder="hint: a blank search finds all animals">
               </input>
             </div>
           </form>
         </p>
-        <p>
-          <div id="search_status" class="span5"></div>
+          <div class="row">
+            <div id="search_status" class="span8"></div>
+          </div>
         </p>
       </div>
       
       <div class="row">
-        <div class="span13" style="height: 500px">
+        <div class="span13" style="min-height: 500px">
 
           <!-- A place to diplay our animal -->
           <table class="span13" id="animal">
@@ -175,22 +175,27 @@
 <script language="javascript" type="text/javascript">
     $(function(){
 
-        function notify(text)
+        function notify(text, fadeout)
         {
+            // By default do not fadeout
+
+            // create a div to close the notification
             var close_div = '<a href="javascript:void(0)" class="close close_notify"> close x &nbsp &nbsp </a>';
             $('.notify').html(close_div + text).fadeIn(1000);
+
+            // Fadeout when the div is clicked
             $('.close_notify').click(function(){ $('.notify').fadeOut()});
+
+            // Also fadeout if fadeout was passed
+            if (typeof(fadeout) !== 'undefined'){
+                $('.notify').fadeOut(1000);
+            }
         }
 
         function read_search()
         {
             var search_terms = $("#search").val();
             return search_terms;
-        }
-
-        function write_search(search_terms)
-        {
-            $("#search").val(search_terms);
         }
 
         function get_offset()
@@ -349,20 +354,6 @@
 
                 if (is_error) {
                     handle_error(response['error']);
-                } else {
-                    // be sure to update the page if the animal id 
-                    // was changed
-                    // this is pretty hacky stuff.  In reality we should
-                    // not tie the permanent animal identifier that we use
-                    // to the one the user uses
-                    if (url.indexOf('col_name=animal_id') !== -1){
-                        var new_animal_id = url.substring(url.indexOf('col_value=') + 'col_value='.length);
-                        var animal = $("#loaded_animal").data('loaded_animal');
-                        animal['animal_id'] = new_animal_id;
-                        var new_search_terms = 'animal_id:' + new_animal_id;
-                        write_search(new_search_terms);
-                        write_url('search_terms', new_search_terms);
-                    }
                 }
             });
         }
@@ -408,7 +399,7 @@
                 // fetch column to create
                 var col_name = $(this).attr('id').substring('create_column_'.length);
 
-                // compose delete url
+                // compose create url
                 var url = 
                     "subi/ajax?" + 
                     "command=create_col&" +
@@ -512,6 +503,12 @@
                 return false;
             }
 
+            // The user should not see the animal id directly,
+            // though they are welcome to create their own
+            if (col_name === 'animal_id'){
+                return false;
+            }
+
            // Extract useful terms
             var value = animal[col_name];
             var col_description = '';
@@ -531,12 +528,7 @@
             var col_id = 'animal_column_' + col_name;
             var delete_col_id = 'delete_column_' + col_name;
 
-            // Don't allow people to delete the animal_id
-            if (col_name === 'animal_id'){
-                var delete_col_link = '';
-            } else {
-                var delete_col_link = get_delete_col_link(delete_col_id);
-            }
+            var delete_col_link = get_delete_col_link(delete_col_id);
 
             $("#animal").find('tbody').append(
                     "<tr>" + 
@@ -633,17 +625,6 @@
 
         }
 
-        function write_animal_to_search_status(animal_id)
-        {
-            // Add count to page and links to go forwards and back
-            if (typeof animal_id !== "undefined"){
-                search_status_html = '';
-            } else {
-                search_status_html = 'No animals found.';
-            }
-            $("#search_status").html(search_status_html);
-        }
-
         function clear_search_status()
         {
             // Add count to page and links to go forwards and back
@@ -657,6 +638,7 @@
             var offset = parseInt(read_url('offset'));
             var result_number = offset + 1;
             var count = parseInt(count);
+            var search_terms = read_url('search_terms');
 
             // Add count to page and links to go forwards and back
             search_status_html = '';
@@ -686,6 +668,11 @@
                 // Always show count
                 search_status_html += " . Animal " + result_number + " of " + count + " . ";
 
+                // Always allow csv download
+                search_status_html += 
+                    "<a href='subi/csv?search_terms=" + search_terms + "'" +
+                    ">download</a> all results (as csv) . ";
+
                 // Show next button if applicable
                 if (result_number < count){
                     search_status_html += 
@@ -703,7 +690,6 @@
             $("#search_status").html(search_status_html);
 
             // Bind events to forwards and back links
-            search_terms = read_url('search_terms');
             $("#prev").click(function(){
                     write_url('offset', offset - 1);
                     search(search_terms);
@@ -713,6 +699,7 @@
                     write_url('offset', offset + 1);
                     search(search_terms);
                     });
+
         }
 
         function check_error(response)
@@ -726,14 +713,10 @@
             // otherwise they should be forwarded
 
             // check for redundant animal id
-            if (error.indexOf('column animal_id is not unique') !== -1){
-                message = "That id is already in use.  Please select another.";
-            } else {
-                message = 
-                    "There has been an error: <br/>"
-                    + "<small>" + error + "'" + "</small><br/>"
-                    + "Email this error message to benjamin.haley@gmail.com";
-            }
+            message = 
+                "There has been an error: <br/>"
+                + "<small>" + error + "'" + "</small><br/>"
+                + "Email this error message to benjamin.haley@gmail.com";
 
             notify(message);
         }
@@ -765,44 +748,7 @@
             // Write the search terms into the url for back button support
             write_url('search_terms', search_terms);
 
-            // Determine how to search
-
-            // We must make a special path to search for an animal
-            is_id_request = ('animal_id:' === search_terms.substring(0, 'animal_id:'.length));
-            if (is_id_request){
-                animal_id = search_terms.substring('animal_id:'.length);
-                search_by_id(animal_id)
-                return null;
-            }
-
-            // If no special search was requested perform a general full
-            // text search
             search_by_fulltext(search_terms);
-        }
-
-        function search_by_id(animal_id)
-        {
-            var url = 'subi/ajax?' + 
-                      'command=lookup_animal' +
-                      '&animal_id=' + animal_id;
-
-            // Request the results
-            $.getJSON(url, function(response) {
-
-                var is_error = check_error(response);
-
-                if (is_error) {
-                    handle_error(response['error']);
-                } else {
-                    // Write animal after we are sure we have column data
-                    get_col_info(function(col_info){
-                        write_animal(response['data'][0], col_info);
-                        if (typeof response['data'][0] !== "undefined"){
-                            write_animal_to_search_status(response['data'][0]['animal_id']);
-                        }
-                    });
-               }
-            })
         }
 
         function search_by_fulltext(search_terms)
@@ -997,9 +943,6 @@
                 // Give them the right to execute
                 $("#" + upload_id).ajaxForm(function(response){
 
-                    // Convert the response to json
-                    response = $.parseJSON(response)
-
                     var is_error = check_error(response);
 
                     if (is_error) {
@@ -1044,9 +987,8 @@
                     "command=insert_new_animal&" +
                     "animal_id=" + animal_id;
 
-                // Update the search terms so we look for 
                 // the new animal on reload
-                search_terms = 'animal_id:' + animal_id;
+                search_terms = animal_id;
                 write_url('search_terms', search_terms);
 
                 // engage
@@ -1080,7 +1022,7 @@
 
                 // Update the search terms so we look for 
                 // the new animal on reload
-                search_terms = 'animal_id:' + copy_id;
+                search_terms = copy_id;
                 write_url('search_terms', search_terms);
 
                 // compose copy url
@@ -1176,7 +1118,7 @@
                 "id='" + replace_db_id + "' " + 
                 "class='btn command' " +        // look like a close
                 "title='Upload a new database to replace the one in use' " +
-                ">Replace current database (only works in google chrome)</a>";
+                ">Replace current database with backup</a>";
             return(link);
         }
 
@@ -1221,11 +1163,10 @@
                 "Please open http://localhost/subi in " +
                 "chrome or firefox."
             ); }
-        
+
             // Search for terms
             var offset = read_url('offset', 0);
             var search_terms = read_url('search_terms', '');
-            write_search(search_terms);
             search(search_terms);
 
             // Focus on search bar

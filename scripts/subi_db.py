@@ -441,6 +441,7 @@ class subi_db_class:
         result['animals'] = []
         result['count'] = 0
 
+        print search_terms
         # Make sure the query is safe
         safe_terms = []
         for term in search_terms:
@@ -911,9 +912,6 @@ class subi_db_integration_test:
 
         if (col_description != unicode_string):
             raise Exception("Unicode not supported")
-
-
-
 
 if __name__ == "__main__":
     #   this deletes the db!

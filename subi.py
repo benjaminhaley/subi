@@ -15,15 +15,15 @@ from __future__ import unicode_literals
 import string
 import cgi
 import time
-from os import curdir, sep, path, listdir
+from os import curdir, sep, path, listdir, unlink
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from urlparse import urlparse, parse_qs
 from scripts import subi_db
 import json
-import shlex          # "'a very' nice boy" -> ['a very', nice, boy]
 import webbrowser
 import codecs
 import traceback
+import csv
 
 webdir = 'web'
 home_url = 'http://localhost/subi'
@@ -81,6 +81,103 @@ class MyHandler(BaseHTTPRequestHandler):
             elif req.path == "/subi/ajax":
                 self.do_AJAX()
                 return
+
+            # Give a csv from full text search
+            # TODO move this with other full text search
+            # into a non-redundant space
+            elif req.path == "/subi/csv":
+
+                # Open a connection to the
+                db = subi_db.subi_db_class()
+
+                # Determine the request
+                req = urlparse(self.path)
+                q = parse_qs(req.query)
+
+                # Fill in default values
+                if 'limit' not in q:
+                    q['limit'] = [10000]
+                if 'offset' not in q:
+                    q['offset'] = [0]
+                if 'search_terms' not in q:
+                    q['search_terms'] = []
+                else:
+                    # Break search terms by spaces
+                    # TODO preserve quoted strings
+                    q['search_terms'] = q['search_terms'][0].split(' ')
+
+                # Request the column info for descriptions
+                col_info = db.col_info()
+                col_descriptions = []
+                col_names = []
+                for col in col_info:
+                    # Remove animal id because its used internally
+                    # and doesn't make sense to the user
+                    if(col['col_name'] != 'animal_id'):
+                        col_names.append(col['col_name'])
+                        col_descriptions.append(col['col_description'])
+
+                # Request the animals
+                result = db.search_fulltext(
+                        q['search_terms'],
+                        q['offset'][0],
+                        q['limit'][0],
+                        )
+
+                # Start a csv file
+                # We will roll our own because python has bad unicode support
+                f = codecs.open('temp.csv', encoding='utf-8', mode='w')
+
+                # First get the headers
+                # Write out the column headers
+                header = ''
+                for description in col_descriptions:
+                    # remove dangerous csv chars
+                    description = description.replace(';', '')
+                    description = description.replace('"', '')
+                    description = description.replace("'", '')
+                    header += description + ';'
+                header += '\n'
+                f.write(header)
+
+                # Then the animals
+                for animal in result['animals']:
+                    row = ''
+                    for name in col_names:
+                        value = str(animal[name])
+
+                        # remove csv dangerous chars
+                        value = value.replace(';', '')
+                        value = value.replace('"', '')
+                        value = value.replace("'", '')
+                        row += value + ';'
+
+                    # Finish the line
+                    row += '\n'
+                    f.write(row)
+
+                # Open the file for reading
+                f.close()
+                f = open('temp.csv')
+
+                # Send the file as a response
+                self.send_response(200)
+                self.send_header(
+                    'Content-disposition',
+                    'attachment; filename=subi results.csv')
+                    # mustn't include unicode above due to
+                    # http://tinyurl.com/62fb7h6
+
+                self.send_header('Content-type', 'application/octet-stream')
+                self.end_headers()
+                self.wfile.write(f.read())
+                f.close()
+
+                # delete the file for good
+                unlink('temp.csv')
+
+                return
+
 
             # contents of the data folder should be accessible
             elif req.path == "/subi/data":
@@ -236,7 +333,10 @@ class MyHandler(BaseHTTPRequestHandler):
                 else:
                     # Break search terms by spaces
                     # while preserving quoted strings
-                    q['search_terms'] = shlex.split(q['search_terms'][0])
+                    # We aren't using shlex, b.c. it doesn't have
+                    # unicode support.  It should in the future, we
+                    # will download it then.
+                    q['search_terms'] = q['search_terms'][0].split(' ')
 
                 result = db.search_fulltext(
                         q['search_terms'],
@@ -281,7 +381,6 @@ class MyHandler(BaseHTTPRequestHandler):
                 response['data'] = data
 
             elif command == "load_db":
-                print q
                 data = db.load_db(q['filename'][0])
                 response['data'] = data
 
