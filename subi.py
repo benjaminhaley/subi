@@ -124,18 +124,30 @@ class MyHandler(BaseHTTPRequestHandler):
                         )
 
                 # Start a csv file
-                # We will roll our own because python has bad unicode support
-                f = codecs.open('temp.csv', encoding='utf-8', mode='w')
-
-                # First get the headers
+                # We have to jump through some hoops
+                # so that excel will recognize our csv, actually tsv.
+                # We can't use the built in csv module, b.c. it does 
+                # not provide unicode support.
+                #
+                # Mostly we need to:
+                #   Use UTF 16 little endian
+                #   use tab seperation
+                #   Supply a BOM at teh begining of file to indicate endiness
+                #
+                # see 
+                #   http://stackoverflow.com/questions/451636/whats-the-best-way-to-export-utf8-data-into-excel
+                
+                f = codecs.open('temp.csv', encoding='utf-16-le', mode='w')
+                
+                # Write the BOM to let them know its unicode
+                f.write('\ufeff')
+                
                 # Write out the column headers
                 header = ''
                 for description in col_descriptions:
                     # remove dangerous csv chars
-                    description = description.replace(';', '')
-                    description = description.replace('"', '')
-                    description = description.replace("'", '')
-                    header += description + ';'
+                    description = description.replace('\t', '')
+                    header += description + '\t'
                 header += '\n'
                 f.write(header)
 
@@ -146,10 +158,8 @@ class MyHandler(BaseHTTPRequestHandler):
                         value = unicode(animal[name])
 
                         # remove csv dangerous chars
-                        value = value.replace(';', '')
-                        value = value.replace('"', '')
-                        value = value.replace("'", '')
-                        row += value + ';'
+                        value = value.replace('\t', '')
+                        row += value + '\t'
 
                     # Finish the line
                     row += '\n'
@@ -495,11 +505,11 @@ class MyHandler(BaseHTTPRequestHandler):
 def main():
     try:
         # Start the server
-        server = HTTPServer(('', 80), MyHandler)
+        server = HTTPServer(('', 8000), MyHandler)
         print 'started httpserver...'
 
         # Open the subi webpage
-        url = 'http://localhost/subi'
+        url = 'http://localhost:8000/subi'
         webbrowser.open_new(url)
 
         # Don't stop serving
