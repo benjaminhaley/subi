@@ -1,14 +1,14 @@
 #############################################################################
-.
+
 SUBI README
-  Notes for users and developers on the Subi data entry and retrival system
-  Most users will only be interested in the basic installation instructions.
-  See the table of contents below.
+  These notes are for developers. Users should visit our online documentation
+
+    http://janus.northwestern.edu/subi
 
 ABOUT SUBI
   subi is made to make it easy to digitize a radiobiology archive and search
   through the results.  Usage instructions are baked into the application.
-  This README shows how to get subi running.
+  This README shows how to update and test subi.
 
 Copyright
   This work is licensed under the Creative Commons Attribution 3.0 Unported 
@@ -22,7 +22,7 @@ Copyright
 Authors
   Benjamin Haley (bmh) <benjamin.haley@gmail.com>
   Dave Paunesku (dp) <daveponet@gmail.com>
-  Dec 2011 - Jan 2011
+  Dec 2011 - Jan 2012
 
 
 #############################################################################
@@ -30,7 +30,7 @@ Authors
 Table of Contents
   (* indicates not written)
 
-  1. (* Basic installation)
+  1. Basic installation
 
   2. Run from script
 
@@ -41,9 +41,12 @@ Table of Contents
 
 Basic Installation
 
-  Not written yet
-  On windows we may require them to copy a shortcut from a folder.
-  It has problems launching out of context.
+  Installation instructions are useful for all users so they are kept online
+  at:
+
+    http://janus.northwestern.edu/subi
+
+  We will not repeat them here to avoid the maintenance overhead.
 
 #############################################################################
 
@@ -65,6 +68,10 @@ Build
 
   Build and Run Subi
     Follow the following steps to build the subi app.
+
+    0. (optional) Update setup.py
+       If you have changed code you may need to update this file
+       open setup.py in a text browser and follow its code.
 
     1. Start in subi directory
        e.g. cd subi/
@@ -92,5 +99,52 @@ Build
 
     6. Visit subi webpage
        http://localhost/subi
+
+#############################################################################
+
+Tests
+
+  Automated tests
+    A suite of tests is baked into the db layer.  These will kill the
+    existing database.  They can be run by calling the script directly
+    with python.
+
+      python scripts/subi_db.py
+
+  Manual tests
+    Testing the UI is a manual process that should be performed cross
+    browser.  Here is a list of the tests we like to run and their most
+    recent results.
+
+    last update: 27 Jan 2012 bmh
+
+    Key:
+      . = passed
+      x = failed
+      c = chrome
+      f = firefox
+      e = internet explorer
+      s = safari
+
+                                Mac           Windows
+                                c   s   f     c   f   e
+    Open about link             .   .   .     .   .   .
+    Home clears search          .   .   .     .   .   .
+    Find all works              .   .   .     .   .   .
+    Next/prev work              .   .   .     .   .   .
+    Download csv                .   .   .     .   .   .
+      * only excel compatible
+
+    Change unicode feild name   .   .   .     .   .   x
+    Change unicode feild value  .   .   .     .   .   x
+    Add unicode field           .   .   .     .   .   x
+    Delete unicode field        .   .   .     .   .   x
+    Cancle field delete         .   .   .     .   .   x
+    Create new from 2nd result  .   .   .     .   .   x
+    Copy from 2nd result        .   .   .     .   .   x
+    Autocomplete unicode        .   .   .     .   .   .
+    Delete animal               .   .   .     .   .   x
+    Cancel animal delete        .   .   .     .   .   .
+    Backup and restore          .   .   .     .   .   .
 
 #############################################################################
