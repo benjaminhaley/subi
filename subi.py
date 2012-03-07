@@ -23,9 +23,12 @@ import json
 import webbrowser
 import codecs
 import traceback
+import re
+import ast
 
 webdir = 'web'
 home_url = 'http://localhost/subi'
+translations_file = 'language.txt'
 
 
 class MyHandler(BaseHTTPRequestHandler):
@@ -47,6 +50,29 @@ class MyHandler(BaseHTTPRequestHandler):
 
         if not client in authorized_clients:
             raise Exception("Client is not authorized!")
+            
+    def __preprocess(self, html, language):
+        """ To support multiple languages,
+            all pages will be preprocessed.
+            
+            {{some text}} will be replaced using the translation file
+        """
+        replace = codecs.open(translations_file, 'r', 'utf-8-sig').read()
+        replace = ast.literal_eval(replace)
+        p = re.compile(r'\{\{.*?\}\}')
+        
+        # I have to compensate for this buggy bullshit
+        # where the ast.literal_eval function converts everything
+        # back to the original utf8 encoding, plus I need utf8 returned
+        # at the end of the day
+        html = p.sub(lambda m: 
+            replace[m.group().encode('utf8')][language.encode('utf8')] 
+            if m.group() in replace
+            and language in replace[m.group()]
+            else m.group()
+            , html)
+        
+        return html
 
     def do_GET(self):
 
@@ -56,6 +82,8 @@ class MyHandler(BaseHTTPRequestHandler):
         print ""
         print("Requested " + self.path)
         req = urlparse(self.path)
+        q = parse_qs(req.query)
+        
         try:
             # serve static content as is
             if req.path in [
@@ -65,6 +93,7 @@ class MyHandler(BaseHTTPRequestHandler):
                     "/jquery.form.js",
                     "/jquery-ui-1.8.css",
                     "/bootstrap.min.css",
+                    "/bootstrap-dropdown.js",
                     "/favicon.ico"]:
                 fpath = req.path
 
@@ -85,105 +114,14 @@ class MyHandler(BaseHTTPRequestHandler):
             # TODO move this with other full text search
             # into a non-redundant space
             elif req.path == "/subi/csv":
-
-                # Open a connection to the
-                db = subi_db.subi_db_class()
-
-                # Determine the request
-                req = urlparse(self.path)
-                q = parse_qs(req.query)
-
-                # Fill in default values
-                if 'limit' not in q:
-                    q['limit'] = [10000]
-                if 'offset' not in q:
-                    q['offset'] = [0]
-                if 'search_terms' not in q:
-                    q['search_terms'] = []
-                else:
-                    # Break search terms by spaces
-                    # TODO preserve quoted strings
-                    q['search_terms'] = q['search_terms'][0].split(' ')
-
-                # Request the column info for descriptions
-                col_info = db.col_info()
-                col_descriptions = []
-                col_names = []
-                for col in col_info:
-                    # Remove animal id because its used internally
-                    # and doesn't make sense to the user
-                    if(col['col_name'] != 'animal_id'):
-                        col_names.append(col['col_name'])
-                        col_descriptions.append(col['col_description'])
-
-                # Request the animals
-                result = db.search_fulltext(
-                        q['search_terms'],
-                        q['offset'][0],
-                        q['limit'][0],
-                        )
-
-                # Start a csv file
-                # We have to jump through some hoops
-                # so that excel will recognize our csv, actually tsv.
-                # We can't use the built in csv module, b.c. it does 
-                # not provide unicode support.
-                #
-                # Mostly we need to:
-                #   Use UTF 16 little endian
-                #   use tab seperation
-                #   Supply a BOM at teh begining of file to indicate endiness
-                #
-                # see 
-                #   http://stackoverflow.com/questions/451636/whats-the-best-way-to-export-utf8-data-into-excel
-                
-                f = codecs.open('temp.csv', encoding='utf-16-le', mode='w')
-                
-                # Write the BOM to let them know its unicode
-                f.write('\ufeff')
-                
-                # Write out the column headers
-                header = ''
-                for description in col_descriptions:
-                    # remove dangerous csv chars
-                    description = description.replace('\t', '')
-                    header += description + '\t'
-                header += '\n'
-                f.write(header)
-
-                # Then the animals
-                for animal in result['animals']:
-                    row = ''
-                    for name in col_names:
-                        value = unicode(animal[name])
-
-                        # remove csv dangerous chars
-                        value = value.replace('\t', '')
-                        row += value + '\t'
-
-                    # Finish the line
-                    row += '\n'
-                    f.write(row)
-
-                # Open the file for reading
-                f.close()
-                f = open('temp.csv')
+                self.__generate_temp_csv()
 
                 # Send the file as a response
-                self.send_response(200)
-                self.send_header(
-                    'Content-disposition',
-                    'attachment; filename=subi_results.csv')
-                    # mustn't include unicode above due to
-                    # http://tinyurl.com/62fb7h6
-
-                self.send_header('Content-type', 'application/octet-stream')
-                self.end_headers()
-                self.wfile.write(f.read())
-                f.close()
-
-                # delete the file for good
-                unlink('temp.csv')
+                self.__serve_file(
+                    filename     = 'subi_results.csv', 
+                    contents     = open('temp.csv').read(),
+                    content_type = 'application/octet-stream'
+                )
 
                 return
 
@@ -197,21 +135,12 @@ class MyHandler(BaseHTTPRequestHandler):
                 # open the backup file
                 filepath = path.join('data', filename)
 
-                # Open the db for reading
-                f = open(filepath, 'r')
-
                 # Send the file as a response
-                self.send_response(200)
-                self.send_header(
-                    'Content-disposition',
-                    'attachment; filename=%s' % filename)
-                    # mustn't include unicode above due to
-                    # http://tinyurl.com/62fb7h6
-
-                self.send_header('Content-type', 'application/octet-stream')
-                self.end_headers()
-                self.wfile.write(f.read())
-                f.close()
+                self.__serve_file(
+                    filename     = filename, 
+                    contents     = open(filepath, 'r').read(),
+                    content_type = 'application/octet-stream'
+                )
 
                 return
 
@@ -220,37 +149,40 @@ class MyHandler(BaseHTTPRequestHandler):
             elif req.path == "/subi/data":
 
                 # Determine the request
-                req = urlparse(self.path)
-                q = parse_qs(req.query)
                 requestfile = q['filename'][0]
 
                 if requestfile not in listdir('data'):
                     # Make sure the requested file in in the data directory
-                    self.send_response(301)
-                    self.send_header('Location', '404')
-                    self.end_headers()
+                    self.__serve_404()
                     return
 
                 else:
                     # Return the requested file
                     filepath = path.join('data', q['filename'][0])
-                    f = open(filepath)
-                    self.send_response(200)
-                    self.send_header(
-                        'Content-disposition',
-                        'attachment; filename=%s' % q['filename'][0])
-                    self.send_header('Content-type', 'application/octet-stream')
-                    self.end_headers()
-                    self.wfile.write(f.read())
-                    f.close()
+                    self.__serve_file(
+                        filename     = q['filename'][0], 
+                        contents     = open(filepath).read(),
+                        content_type = 'application/octet-stream'
+                    )
                     return
+                    
+            # And they might want an offline manual
+            elif req.path == "/subi/userguide.pdf":
+                self.__serve_file(
+                    filename     = 'userguide.pdf', 
+                    contents     = open('userguide.pdf', 'rb').read(),
+                    content_type = 'application/pdf'
+                )
+                return
 
             # if the request is not recognized return an error
             else:
-                self.send_response(301)
-                self.send_header('Location', '404')
-                self.end_headers()
+                self.__serve_404()
                 return
+
+            # by default we return the corresponding file
+            # in the web directory
+            contents = open(webdir + fpath).read()
 
             # Determine the content type
             if fpath.endswith(".css"):
@@ -259,24 +191,44 @@ class MyHandler(BaseHTTPRequestHandler):
                 content_type = 'application/javascript'
             else:
                 content_type = 'text/html'
+                # Preprocessing {{text_to_translate}} first
+                if 'language' not in q:
+                    q['language'] = ['english']
+                contents = self.__preprocess(contents, q['language'][0])
 
-            # by default we return the corresponding .html file
-            # in the web directory
-            f = open(webdir + fpath)
             self.send_response(200)
             self.send_header('Content-type', content_type)
             self.end_headers()
-            self.wfile.write(f.read())
-            f.close()
+            self.wfile.write(contents)
             return
 
         except IOError:
-            self.send_error(
-                404,
-                'File Not Found: %s.  Please visit %s '
-                 % (self.path, home_url)
-            )
+            self.__serve_404()
+            
+    def __serve_file(self, filename, contents, content_type):
+        """ 
+            Serve a file via http
+        """
+        self.send_response(200)
+        self.send_header(
+            'Content-disposition',
+            'attachment; filename=%s' % filename)
+        self.send_header('Content-type', content_type)
+        self.end_headers()
+        self.wfile.write(contents)
+        return
+       
+    def __serve_404(self):
+        """ 
+            Let them know we are having trouble processing the request
+        """
+        self.send_error(
+            404,
+            'File Not Found: %s.  Please visit %s '% (self.path, home_url)
+        )
 
+        return
+        
     def do_AJAX(self):
         """
             This is outside the specification of the class.
@@ -442,7 +394,6 @@ class MyHandler(BaseHTTPRequestHandler):
                         }
 
         except Exception as e:
-#           raise
             # add call and traceback info to error message so I can debug
             msg = "Requested " + self.path + "\n"
             msg += traceback.format_exc()
@@ -502,6 +453,91 @@ class MyHandler(BaseHTTPRequestHandler):
         self.end_headers()
         #self.wfile.write(json_response)
         return
+        
+    # make temp csv from the full text search
+    # TODO move this with other full text search
+    # into a non-redundant space
+    def __generate_temp_csv(self):
+
+        req = urlparse(self.path)
+        q = parse_qs(req.query)
+    
+        # Open a connection to the
+        db = subi_db.subi_db_class()
+
+        # Fill in default values
+        if 'limit' not in q:
+            q['limit'] = [10000]
+        if 'offset' not in q:
+            q['offset'] = [0]
+        if 'search_terms' not in q:
+            q['search_terms'] = []
+        else:
+            # Break search terms by spaces
+            # TODO preserve quoted strings
+            q['search_terms'] = q['search_terms'][0].split(' ')
+
+        # Request the column info for descriptions
+        col_info = db.col_info()
+        col_descriptions = []
+        col_names = []
+        for col in col_info:
+            # Remove animal id because its used internally
+            # and doesn't make sense to the user
+            if(col['col_name'] != 'animal_id'):
+                col_names.append(col['col_name'])
+                col_descriptions.append(col['col_description'])
+
+        # Request the animals
+        result = db.search_fulltext(
+                        q['search_terms'],
+                        q['offset'][0],
+                        q['limit'][0],
+                        )
+
+        # Start a csv file
+        # We have to jump through some hoops
+        # so that excel will recognize our csv, actually tsv.
+        # We can't use the built in csv module, b.c. it does 
+        # not provide unicode support.
+        #
+        # Mostly we need to:
+        #   Use UTF 16 little endian
+        #   use tab seperation
+        #   Supply a BOM at teh begining of file to indicate endiness
+        #
+        # see 
+        #   http://stackoverflow.com/questions/451636/whats-the-best-way-to-export-utf8-data-into-excel
+        
+        f = codecs.open('temp.csv', encoding='utf-16-le', mode='w')
+        
+        # Write the BOM to let them know its unicode
+        f.write('\ufeff')
+        
+        # Write out the column headers
+        header = ''
+        for description in col_descriptions:
+            # remove dangerous csv chars
+            description = str(description).replace('\t', '')
+            header += description + '\t'
+        
+        header += '\n'
+        f.write(header)
+
+        # Then the animals
+        for animal in result['animals']:
+            row = ''
+            for name in col_names:
+                value = unicode(animal[name])
+                # remove csv dangerous chars
+                value = value.replace('\t', '')
+                row += value + '\t'
+
+            # Finish the line
+            row += '\n'
+            f.write(row)
+        
+        f.close()
 
 
 def main():

@@ -1,0 +1,297 @@
+﻿# This is the translation file
+# Maintain the existing format exactly
+
+# close
+
+{
+    # add new entries below this line
+    
+    """{{about}}""" : {
+        """english""":"""about""",
+        """russian""":"""about-ru"""
+    },
+    """{{Animal}}""" : {
+        """english""":"""Animal""",
+        """russian""":"""Animal-ru"""
+    },
+    """{{a necessary evil}}""" : {
+        """english""":"""a necessary evil""",
+        """russian""":"""a necessary evil-ru"""
+    },
+    """{{Add a new data field to every animal}}""" : {
+        """english""":"""Add a new data field to every animal""",
+        """russian""":"""Add a new data field to every animal-ru"""
+    },
+    """{{add field}}""" : {
+        """english""":"""add field""",
+        """russian""":"""add field-ru"""
+    },
+    """{{all of my love}}""" : {
+        """english""":"""all of my love""",
+        """russian""":"""all of my love-ru"""
+    },
+    """{{and the}}""" : {
+        """english""":"""and the""",
+        """russian""":"""and the-ru"""
+    },
+    """{{and,}}""" : {
+        """english""":"""and,""",
+        """russian""":"""and,-ru"""
+    },
+    """{{and}}""" : {
+        """english""":"""and""",
+        """russian""":"""and-ru"""
+    },
+    """{{animal deleted}}""" : {
+        """english""":"""animal deleted""",
+        """russian""":"""animal deleted-ru"""
+    },
+    """{{Are you sure you want to delete this value for all animals?}}""" : {
+        """english""":"""Are you sure you want to delete this value for all animals?""",
+        """russian""":"""Are you sure you want to delete this value for all animals?-ru"""
+    },
+    """{{Are you sure you want to permanently delete this animal?}}""" : {
+        """english""":"""Are you sure you want to permanently delete this animal?""",
+        """russian""":"""Are you sure you want to permanently delete this animal?-ru"""
+    },
+    """{{as a gift to the radiobiology researchers at The Southern Urals Biophysics Institute}}""" : {
+        """english""":"""as a gift to the radiobiology researchers at The Southern Urals Biophysics Institute""",
+        """russian""":"""as a gift to the radiobiology researchers at The Southern Urals Biophysics Institute-ru"""
+    },
+    """{{backup database}}""" : {
+        """english""":"""backup database""",
+        """russian""":"""backup database-ru"""
+    },
+    """{{Ben Haley}}""" : {
+        """english""":"""Ben Haley""",
+        """russian""":"""Ben Haley-ru"""
+    },
+    """{{bootstrap}}""" : {
+        """english""":"""bootstrap""",
+        """russian""":"""bootstrap-ru"""
+    },
+    """{{Built by}}""" : {
+        """english""":"""Built by""",
+        """russian""":"""Built by-ru"""
+    },
+    """{{Cancel}}""" : {
+        """english""":"""Cancel""",
+        """russian""":"""Cancel-ru"""
+    },
+    """{{chrome is nice}}""" : {
+        """english""":"""chrome is nice""",
+        """russian""":"""chrome is nice-ru"""
+    },
+    """{{chrome or firefox.}}""" : {
+        """english""":"""chrome or firefox.""",
+        """russian""":"""chrome or firefox.-ru"""
+    },
+    """{{Click to edit}}""" : {
+        """english""":"""Click to edit""",
+        """russian""":"""Click to edit-ru"""
+    },
+    """{{close}}""" : {
+        """english""":"""close""",
+        """russian""":"""close-ru"""
+    },
+    """{{copy this animal}}""" : {
+        """english""":"""copy this animal""",
+        """russian""":"""copy this animal-ru"""
+    },
+    """{{courtesy of the}}""" : {
+        """english""":"""courtesy of the""",
+        """russian""":"""courtesy of the-ru"""
+    },
+    """{{create new animal}}""" : {
+        """english""":"""create new animal""",
+        """russian""":"""create new animal-ru"""
+    },
+    """{{Dave Paunesku}}""" : {
+        """english""":"""Dave Paunesku""",
+        """russian""":"""Dave Paunesku-ru"""
+    },
+    """{{Delete field for all animals}}""" : {
+        """english""":"""Delete field for all animals""",
+        """russian""":"""Delete field for all animals-ru"""
+    },
+    """{{delete this animal}}""" : {
+        """english""":"""delete this animal""",
+        """russian""":"""delete this animal-ru"""
+    },
+    """{{Delete}}""" : {
+        """english""":"""Delete""",
+        """russian""":"""Delete-ru"""
+    },
+    """{{Download a backup file of the current database}}""" : {
+        """english""":"""Download a backup file of the current database""",
+        """russian""":"""Download a backup file of the current database-ru"""
+    },
+    """{{download csv}}""" : {
+        """english""":"""download csv""",
+        """russian""":"""download csv-ru"""
+    },
+    """{{download full records from the animals matching the query}}""" : {
+        """english""":"""download full records from the animals matching the query""",
+        """russian""":"""download full records from the animals matching the query-ru"""
+    },
+    """{{Email this error message to}}""" : {
+        """english""":"""Email this error message to""",
+        """russian""":"""Email this error message to-ru"""
+    },
+    """{{English}}""" : {
+        """english""":"""English""",
+        """russian""":"""English-ru"""
+    },
+    """{{find all animals}}""" : {
+        """english""":"""find all animals""",
+        """russian""":"""find all animals-ru"""
+    },
+    """{{For questions contact}}""" : {
+        """english""":"""For questions contact""",
+        """russian""":"""For questions contact-ru"""
+    },
+    """{{github}}""" : {
+        """english""":"""github""",
+        """russian""":"""github-ru"""
+    },
+    """{{home}}""" : {
+        """english""":"""home""",
+        """russian""":"""home-ru"""
+    },
+    """{{jeditable}}""" : {
+        """english""":"""jeditable""",
+        """russian""":"""jeditable-ru"""
+    },
+    """{{jquery}}""" : {
+        """english""":"""jquery""",
+        """russian""":"""jquery-ru"""
+    },
+    """{{language}}""" : {
+        """english""":"""language""",
+        """russian""":"""language-ru"""
+    },
+    """{{loading...}}""" : {
+        """english""":"""loading...""",
+        """russian""":"""loading...-ru"""
+    },
+    """{{making things easy, cept IE}}""" : {
+        """english""":"""making things easy, cept IE""",
+        """russian""":"""making things easy, cept IE-ru"""
+    },
+    """{{New database loaded}}""" : {
+        """english""":"""New database loaded""",
+        """russian""":"""New database loaded-ru"""
+    },
+    """{{next}}""" : {
+        """english""":"""next""",
+        """russian""":"""next-ru"""
+    },
+    """{{No animals found.}}""" : {
+        """english""":"""No animals found.""",
+        """russian""":"""No animals found.-ru"""
+    },
+    """{{of}}""" : {
+        """english""":"""of""",
+        """russian""":"""of-ru"""
+    },
+    """{{open up}}""" : {
+        """english""":"""open up""",
+        """russian""":"""open up-ru"""
+    },
+    """{{or}}""" : {
+        """english""":"""or""",
+        """russian""":"""or-ru"""
+    },
+    """{{paying ben's bills}}""" : {
+        """english""":"""paying ben's bills""",
+        """russian""":"""paying ben's bills-ru"""
+    },
+    """{{paying gayle's bills}}""" : {
+        """english""":"""paying gayle's bills""",
+        """russian""":"""paying gayle's bills-ru"""
+    },
+    """{{Please open http://localhost:8000/subi in}}""" : {
+        """english""":"""Please open http://localhost:8000/subi in""",
+        """russian""":"""Please open http://localhost:8000/subi in-ru"""
+    },
+    """{{previous}}""" : {
+        """english""":"""previous""",
+        """russian""":"""previous-ru"""
+    },
+    """{{python}}""" : {
+        """english""":"""python""",
+        """russian""":"""python-ru"""
+    },
+    """{{replace database}}""" : {
+        """english""":"""replace database""",
+        """russian""":"""replace database-ru"""
+    },
+    """{{rarrr}}""" : {
+        """english""":"""rarrr""",
+        """russian""":"""rarrr-ru"""
+    },
+    """{{Russian}}""" : {
+        """english""":"""русский""",
+        """russian""":"""русский"""
+    },
+    """{{search}}""" : {
+        """english""":"""search""",
+        """russian""":"""search-ru"""
+    },
+    """{{Select a backup file to permanently replace the existing data.}}""" : {
+        """english""":"""Select a backup file to permanently replace the existing data.""",
+        """russian""":"""Select a backup file to permanently replace the existing data.-ru"""
+    },
+    """{{Source code is available from}}""" : {
+        """english""":"""Source code is available from""",
+        """russian""":"""Source code is available from-ru"""
+    },
+    """{{sqllite}}""" : {
+        """english""":"""sqllite""",
+        """russian""":"""sqllite-ru"""
+    },
+    """{{subi does not support Internet Explorer yet.}}""" : {
+        """english""":"""subi does not support Internet Explorer yet.""",
+        """russian""":"""subi does not support Internet Explorer yet.-ru"""
+    },
+    """{{subi}}""" : {
+        """english""":"""subi""",
+        """russian""":"""subi-ru"""
+    },
+    """{{the creator}}""" : {
+        """english""":"""the creator""",
+        """russian""":"""the creator-ru"""
+    },
+    """{{the engine}}""" : {
+        """english""":"""the engine""",
+        """russian""":"""the engine-ru"""
+    },
+    """{{the jquery form plugin}}""" : {
+        """english""":"""the jquery form plugin""",
+        """russian""":"""the jquery form plugin-ru"""
+    },
+    """{{There has been an error:}}""" : {
+        """english""":"""There has been an error:""",
+        """russian""":"""There has been an error:-ru"""
+    },
+    """{{U.S. Department of Energy}}""" : {
+        """english""":"""U.S. Department of Energy""",
+        """russian""":"""U.S. Department of Energy-ru"""
+    },
+    """{{Upload a new database to replace the one in use}}""" : {
+        """english""":"""Upload a new database to replace the one in use""",
+        """russian""":"""Upload a new database to replace the one in use-ru"""
+    },
+    """{{using}}""" : {
+        """english""":"""using""",
+        """russian""":"""using-ru"""
+    },
+    """{{we heart sqlite}}""" : {
+        """english""":"""we heart sqlite""",
+        """russian""":"""we heart sqlite-ru"""
+    },
+    """{{Woloschak Laboratory}}""" : {
+        """english""":"""Woloschak Laboratory""",
+        """russian""":"""Woloschak Laboratory-ru"""
+    },
+}

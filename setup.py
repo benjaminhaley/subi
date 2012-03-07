@@ -54,6 +54,7 @@ elif sys.platform == 'win32':
                     r'web\\subi.html',
                     r'web\\upload.html',
                     r'web\\favicon.ico',
+                    r'web\\bootstrap-dropdown.js',
                     r'web\\jquery-1.7.1.min.js',
                     r'web\\jquery.form.js',
                     r'web\\jquery.jeditable.mini.js',
@@ -65,7 +66,9 @@ elif sys.platform == 'win32':
                     r'data\\subi.db',
                     r'data\\subi_backup_example',
                 ]
-            )
+            ),
+            r'userguide.pdf',
+            r'language.txt'
         ],
         console=[mainscript],
 

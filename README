@@ -22,7 +22,7 @@ Copyright
 Authors
   Benjamin Haley (bmh) <benjamin.haley@gmail.com>
   Dave Paunesku (dp) <daveponet@gmail.com>
-  Dec 2011 - Jan 2012
+  Dec 2011 - March 2012
 
 
 #############################################################################
@@ -97,9 +97,6 @@ Build
        (for windows)
        dist/subi.exe
 
-    6. Visit subi webpage
-       http://localhost/subi
-
 #############################################################################
 
 Tests
@@ -116,7 +113,8 @@ Tests
     browser.  Here is a list of the tests we like to run and their most
     recent results.
 
-    last update: 27 Jan 2012 bmh
+    last win update: 6 March 2012 bmh
+    last mac update: 27 January 2012 bmh
 
     Key:
       . = passed
@@ -128,11 +126,12 @@ Tests
 
                                 Mac           Windows
                                 c   s   f     c   f   e
+    russian translation         ?   ?   ?     .   .   .
     Open about link             .   .   .     .   .   .
     Home clears search          .   .   .     .   .   .
     Find all works              .   .   .     .   .   .
     Next/prev work              .   .   .     .   .   .
-    Download csv                .   .   .     .   .   .
+    Download unicode csv        .   .   .     .   .   .
       * only excel compatible
 
     Change unicode feild name   .   .   .     .   .   x
@@ -142,9 +141,9 @@ Tests
     Cancle field delete         .   .   .     .   .   x
     Create new from 2nd result  .   .   .     .   .   x
     Copy from 2nd result        .   .   .     .   .   x
-    Autocomplete unicode        .   .   .     .   .   .
+    Autocomplete unicode        .   .   .     .   .   ?
     Delete animal               .   .   .     .   .   x
-    Cancel animal delete        .   .   .     .   .   .
+    Cancel animal delete        .   .   .     .   .   ?
     Backup and restore          .   .   .     .   .   .
 
 #############################################################################
