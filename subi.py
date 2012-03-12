@@ -26,9 +26,11 @@ import traceback
 import re
 import ast
 
+# Configuration
 webdir = 'web'
 home_url = 'http://localhost/subi'
 translations_file = 'language.txt'
+delimiter = ";"
 
 
 class MyHandler(BaseHTTPRequestHandler):
@@ -518,8 +520,8 @@ class MyHandler(BaseHTTPRequestHandler):
         header = ''
         for description in col_descriptions:
             # remove dangerous csv chars
-            description = str(description).replace('\t', '')
-            header += description + '\t'
+            description = str(description).replace(delimiter, '')
+            header += description + delimiter
         
         header += '\n'
         f.write(header)
@@ -530,8 +532,8 @@ class MyHandler(BaseHTTPRequestHandler):
             for name in col_names:
                 value = unicode(animal[name])
                 # remove csv dangerous chars
-                value = value.replace('\t', '')
-                row += value + '\t'
+                value = value.replace(delimiter, '')
+                row += value + delimiter
 
             # Finish the line
             row += '\n'
