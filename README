@@ -87,9 +87,7 @@ Build
        (for windows)
        python setup.py py2exe     # Add -A to use source files
 
-    4. Kill any exisiting webservers (may be unecessary)
-
-    5. Launch subi server
+    4. Launch subi server
 
        (for mac)
        sudo dist/Subi.app/Contents/MacOS/Subi
